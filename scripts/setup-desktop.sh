@@ -7,6 +7,11 @@ REAL_HOME="$(eval echo "~$REAL_USER")"
 
 DESKTOP_DIR="$REAL_HOME/Desktop"
 
+
+if [[ -n "$DESKTOP_DIR" && -d "$DESKTOP_DIR" ]]; then
+    rm -rf "$DESKTOP_DIR"
+fi
+
 mkdir -p "$DESKTOP_DIR"
 
 # --------------------------------------------------
