@@ -10,18 +10,22 @@ LABWC_DIR="$REAL_HOME/.config/labwc"
 mkdir -p "$WAYBAR_DIR"
 mkdir -p "$LABWC_DIR"
 
-# --------------------------------------------------
-# CONFIG
-# --------------------------------------------------
+# ============================
+# WAYBAR CONFIG
+# ============================
 
 cat > "$WAYBAR_DIR/config.jsonc" <<'EOF'
 {
   "layer": "top",
-  "position": "top",
+  "position": "bottom",
+  "height": 28,
+
+  "modules-left": [
+    "clock"
+  ],
 
   "modules-right": [
-    "custom/tailscale",
-    "clock"
+    "custom/tailscale"
   ],
 
   "custom/tailscale": {
@@ -37,14 +41,17 @@ cat > "$WAYBAR_DIR/config.jsonc" <<'EOF'
 }
 EOF
 
-# --------------------------------------------------
-# STYLE (THIS FIXES YOUR COLORS)
-# --------------------------------------------------
+# ============================
+# WAYBAR STYLE
+# ============================
 
 cat > "$WAYBAR_DIR/style.css" <<'EOF'
 * {
+    border: none;
+    border-radius: 0;
     font-family: Sans;
     font-size: 12px;
+    min-height: 0;
 }
 
 window#waybar {
@@ -52,25 +59,33 @@ window#waybar {
     color: #ffffff;
 }
 
-/* Tailscale states */
-#custom-tailscale.connected {
-    color: #00ff88;
-    font-weight: bold;
+/* Clock */
+
+#clock {
+    padding: 0 10px;
+    margin: 2px 4px;
 }
 
-#custom-tailscale.disconnected {
-    color: #ff4444;
-    font-weight: bold;
-}
+/* Tailscale */
 
 #custom-tailscale {
     padding: 0 10px;
+    margin: 2px 4px;
+    font-weight: bold;
+}
+
+#custom-tailscale.connected {
+    color: #00ff88;
+}
+
+#custom-tailscale.disconnected {
+    color: #ff5555;
 }
 EOF
 
-# --------------------------------------------------
-# TAILSCALE STATUS SCRIPT (CLASS-BASED COLORING)
-# --------------------------------------------------
+# ============================
+# TAILSCALE STATUS SCRIPT
+# ============================
 
 cat > "$WAYBAR_DIR/tailscale-status.sh" <<'EOF'
 #!/usr/bin/env bash
@@ -82,23 +97,32 @@ fi
 
 STATUS=$(tailscale status --json 2>/dev/null || true)
 
-if command -v jq >/dev/null 2>&1 && echo "$STATUS" | jq -e '.BackendState == "Running"' >/dev/null 2>&1; then
-    echo '{"text":"TS","class":"connected","tooltip":"Tailscale Connected"}'
+if command -v jq >/dev/null 2>&1 && \
+   echo "$STATUS" | jq -e '.BackendState == "Running"' >/dev/null 2>&1; then
+
+    echo '{"text":"● TS","class":"connected","tooltip":"Tailscale Connected"}'
 else
-    echo '{"text":"TS","class":"disconnected","tooltip":"Tailscale Disconnected"}'
+    echo '{"text":"● TS","class":"disconnected","tooltip":"Tailscale Disconnected"}'
 fi
 EOF
 
 chmod +x "$WAYBAR_DIR/tailscale-status.sh"
 
-# --------------------------------------------------
-# LABWC AUTOSTART (IDEMPOTENT)
-# --------------------------------------------------
+# ============================
+# LABWC AUTOSTART
+# ============================
 
 AUTOSTART="$LABWC_DIR/autostart"
+
 touch "$AUTOSTART"
 
 grep -qxF "waybar &" "$AUTOSTART" || echo "waybar &" >> "$AUTOSTART"
+
+# ============================
+# OWNERSHIP FIX
+# ============================
+
+chown -R "$REAL_USER:$REAL_USER" "$WAYBAR_DIR"
 
 echo ""
 echo "[✓] Waybar configured successfully"
