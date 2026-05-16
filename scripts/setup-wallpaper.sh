@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
@@ -18,28 +17,20 @@ echo "========================================="
 echo ""
 
 # --------------------------------------------------
-# Validate default wallpaper exists
+# Validate wallpaper
 # --------------------------------------------------
 
 if [[ ! -f "$SELECTED_WALLPAPER" ]]; then
-    echo "[!] Default wallpaper not found:"
-    echo "    $SELECTED_WALLPAPER"
-    echo "[!] Falling back to first available image..."
+    echo "[!] Default wallpaper not found"
+    SELECTED_WALLPAPER=$(find "$WALLPAPER_DIR" -maxdepth 1 \( -iname "*.jpg" -o -iname "*.png" \) | sort | head -n 1)
 
-    SELECTED_WALLPAPER=$(find "$WALLPAPER_DIR" -maxdepth 1 \
-        \( -iname "*.jpg" -o -iname "*.png" \) | sort | head -n 1)
-
-    if [[ -z "$SELECTED_WALLPAPER" ]]; then
-        echo "[!] No wallpapers available. Exiting."
-        exit 1
-    fi
+    [[ -z "$SELECTED_WALLPAPER" ]] && exit 1
 fi
 
-echo "[*] Using wallpaper:"
-echo "    $(basename "$SELECTED_WALLPAPER")"
+echo "[*] Using wallpaper: $(basename "$SELECTED_WALLPAPER")"
 
 # --------------------------------------------------
-# Copy wallpaper into user space
+# Copy wallpaper
 # --------------------------------------------------
 
 mkdir -p "$REAL_HOME/Pictures"
@@ -50,7 +41,7 @@ DEST="$REAL_HOME/Pictures/homelab-wallpaper.$EXT"
 cp "$SELECTED_WALLPAPER" "$DEST"
 
 # --------------------------------------------------
-# Apply wallpaper (LXDE / pcmanfm)
+# FIX: correct LXDE config file
 # --------------------------------------------------
 
 mkdir -p "$REAL_HOME/.config/pcmanfm/LXDE-pi"
@@ -58,9 +49,18 @@ mkdir -p "$REAL_HOME/.config/pcmanfm/LXDE-pi"
 cat > "$REAL_HOME/.config/pcmanfm/LXDE-pi/desktop-items-0.conf" <<EOF
 [*]
 wallpaper=$DEST
-wallpaper_mode=fit
+wallpaper_mode=stretch
 desktop_bg=#000000
+show_wm_menu=0
 EOF
+
+# --------------------------------------------------
+# FORCE reload (important fix)
+# --------------------------------------------------
+
+if command -v pcmanfm >/dev/null 2>&1; then
+    pcmanfm --reconfigure >/dev/null 2>&1 || true
+fi
 
 echo ""
 echo "[✓] Wallpaper configured successfully."
