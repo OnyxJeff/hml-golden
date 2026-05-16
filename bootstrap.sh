@@ -114,18 +114,18 @@ step "Checking dependencies"
 
 # Single silent apt update (avoid spam)
 run_with_spinner "Refreshing package index" bash -c '
-    apt-get update -qq
+    sudo apt-get update -qq
 '
 
 command -v git >/dev/null 2>&1 || {
     run_with_spinner "Installing git" bash -c '
-        apt-get install -y -qq git
+        sudo apt-get install -y -qq git
     '
 }
 
 command -v curl >/dev/null 2>&1 || {
     run_with_spinner "Installing curl" bash -c '
-        apt-get install -y -qq curl
+        sudo apt-get install -y -qq curl
     '
 }
 
