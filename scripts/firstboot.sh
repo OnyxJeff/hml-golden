@@ -89,16 +89,16 @@ section "SYSTEM PACKAGES"
 
 run_with_spinner "Updating package lists" bash -c "
     export DEBIAN_FRONTEND=noninteractive
-    apt-get update -qq
+    sudo apt update -qq
 "
 
 run_with_spinner "Upgrading packages" bash -c "
     export DEBIAN_FRONTEND=noninteractive
-    apt-get upgrade -y -qq
+    sudo apt upgrade -y -qq
 "
 
 run_with_spinner "Cleaning up packages" bash -c "
-    apt-get autoremove -y -qq
+    sudo apt autoremove -y -qq
 "
 
 step "Installing core apps"
