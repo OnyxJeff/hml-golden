@@ -41,18 +41,25 @@ DEST="$REAL_HOME/Pictures/homelab-wallpaper.$EXT"
 cp "$SELECTED_WALLPAPER" "$DEST"
 
 # --------------------------------------------------
-# FIX: correct LXDE config file
+# Apply wallpaper (LXDE / pcmanfm)
 # --------------------------------------------------
 
 mkdir -p "$REAL_HOME/.config/pcmanfm/LXDE-pi"
 
-cat > "$REAL_HOME/.config/pcmanfm/LXDE-pi/desktop-items-0.conf" <<EOF
+# Most reliable filename for LXDE sessions
+CONF_FILE="$REAL_HOME/.config/pcmanfm/LXDE-pi/desktop-items-0.conf"
+
+cat > "$CONF_FILE" <<EOF
 [*]
 wallpaper=$DEST
-wallpaper_mode=stretch
+wallpaper_mode=fit
 desktop_bg=#000000
 show_wm_menu=0
+desktop_font=Sans 10
 EOF
+
+# Ensure ownership is correct (VERY important when run via sudo)
+chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.config/pcmanfm" "$REAL_HOME/Pictures"
 
 # --------------------------------------------------
 # FORCE reload (important fix)
