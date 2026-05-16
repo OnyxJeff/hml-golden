@@ -5,6 +5,10 @@ export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
 export APT_LISTCHANGES_FRONTEND=none
 
+echo "[packages] fixing dpkg state if needed..."
+dpkg --configure -a || true
+apt-get install -f -y || true
+
 echo "[packages] updating..."
 apt-get update -y -qq
 

@@ -165,7 +165,7 @@ fi
 step "Cloning repository"
 
 if [ ! -d "$REPO_NAME" ]; then
-    run_with_spinner "Cloning repository" git clone --depth 1 "$REPO_URL"
+    run_with_spinner "Cloning repository " git clone --depth 1 "$REPO_URL"
 else
     step "Updating repository"
     cd "$REPO_NAME"
