@@ -127,14 +127,24 @@ section "REPOSITORY SETUP"
 
 cd "$BASE_DIR"
 
-step "Ensuring repository exists"
+export GIT_TERMINAL_PROMPT=0
 
+step "Checking repository access"
+if ! git ls-remote "$REPO_URL" >/dev/null 2>&1; then
+    err "Cannot access repo: $REPO_URL"
+    err "Repo is likely private or URL is wrong"
+    exit 1
+fi
+
+step "Cloning repository"
 if [ ! -d "$REPO_NAME" ]; then
-    run_with_spinner "Cloning repository" git clone "$REPO_URL"
+    run_with_spinner "Cloning repository" \
+    git clone --depth 1 "$REPO_URL"
 else
     step "Updating repository"
     cd "$REPO_NAME"
-    run_with_spinner "Pulling latest changes" git pull
+    run_with_spinner "Pulling latest changes" \
+    git pull --ff-only
     cd "$BASE_DIR"
 fi
 
