@@ -175,6 +175,10 @@ if [[ -f "$HOME/hml-golden/scripts/setup-waybar.sh" ]]; then
     run_with_spinner "Configuring Waybar " bash "$HOME/hml-golden/scripts/setup-waybar.sh" || true
 fi
 
+if [[ -f "$HOME/hml-golden/scripts/setup-desktop.sh" ]]; then
+    run_with_spinner "Configuring Desktop " bash "$HOME/hml-golden/scripts/setup-desktop.sh" || true
+fi
+
 ok "Desktop configured"
 
 # ============================
