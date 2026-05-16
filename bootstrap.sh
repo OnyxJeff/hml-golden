@@ -15,8 +15,8 @@ export GIT_TERMINAL_PROMPT=0
 
 # Requesting sudo upfront (for better UX later)
 if [[ $EUID -ne 0 ]]; then
-    echo "Requesting sudo once for system operations..."
-    sudo -v
+    echo "Requesting sudo for full bootstrap execution..."
+    exec sudo -E bash "$0" "$@"
 fi
 
 # keep sudo alive during script

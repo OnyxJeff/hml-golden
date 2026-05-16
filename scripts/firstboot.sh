@@ -9,7 +9,7 @@ export NEEDRESTART_MODE=a
 # ============================
 
 if [[ $EUID -ne 0 ]]; then
-    echo "ERROR: firstboot must be run as root (called by bootstrap)"
+    echo "firstboot must run as root"
     exit 1
 fi
 
