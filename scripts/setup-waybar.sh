@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
 REAL_HOME="$(eval echo "~$REAL_USER")"
 
-mkdir -p "$REAL_HOME/.config/waybar"
+WAYBAR_DIR="$REAL_HOME/.config/waybar"
+LABWC_DIR="$REAL_HOME/.config/labwc"
+
+mkdir -p "$WAYBAR_DIR"
+mkdir -p "$LABWC_DIR"
 
 # --------------------------------------------------
 # CONFIG
 # --------------------------------------------------
 
-cat > "$REAL_HOME/.config/waybar/config.jsonc" <<EOF
+cat > "$WAYBAR_DIR/config.jsonc" <<'EOF'
 {
   "layer": "top",
   "position": "top",
@@ -35,36 +38,67 @@ cat > "$REAL_HOME/.config/waybar/config.jsonc" <<EOF
 EOF
 
 # --------------------------------------------------
-# SAFE TAILSCALE SCRIPT (MAJOR FIX)
+# STYLE (THIS FIXES YOUR COLORS)
 # --------------------------------------------------
 
-cat > "$REAL_HOME/.config/waybar/tailscale-status.sh" <<'EOF'
+cat > "$WAYBAR_DIR/style.css" <<'EOF'
+* {
+    font-family: Sans;
+    font-size: 12px;
+}
+
+window#waybar {
+    background: rgba(20, 20, 20, 0.92);
+    color: #ffffff;
+}
+
+/* Tailscale states */
+#custom-tailscale.connected {
+    color: #00ff88;
+    font-weight: bold;
+}
+
+#custom-tailscale.disconnected {
+    color: #ff4444;
+    font-weight: bold;
+}
+
+#custom-tailscale {
+    padding: 0 10px;
+}
+EOF
+
+# --------------------------------------------------
+# TAILSCALE STATUS SCRIPT (CLASS-BASED COLORING)
+# --------------------------------------------------
+
+cat > "$WAYBAR_DIR/tailscale-status.sh" <<'EOF'
 #!/usr/bin/env bash
 
-# Failsafe output ALWAYS returned
 if ! command -v tailscale >/dev/null 2>&1; then
-    echo '{"text":"⚪ TS","tooltip":"Tailscale not installed"}'
+    echo '{"text":"TS","class":"disconnected","tooltip":"Tailscale not installed"}'
     exit 0
 fi
 
 STATUS=$(tailscale status --json 2>/dev/null || true)
 
 if command -v jq >/dev/null 2>&1 && echo "$STATUS" | jq -e '.BackendState == "Running"' >/dev/null 2>&1; then
-    echo '{"text":"🟢 TS","tooltip":"Connected"}'
+    echo '{"text":"TS","class":"connected","tooltip":"Tailscale Connected"}'
 else
-    echo '{"text":"🔴 TS","tooltip":"Disconnected"}'
+    echo '{"text":"TS","class":"disconnected","tooltip":"Tailscale Disconnected"}'
 fi
 EOF
 
-chmod +x "$REAL_HOME/.config/waybar/tailscale-status.sh"
+chmod +x "$WAYBAR_DIR/tailscale-status.sh"
 
 # --------------------------------------------------
-# LABWC AUTOSTART (IDEMPOTENT FIX)
+# LABWC AUTOSTART (IDEMPOTENT)
 # --------------------------------------------------
 
-mkdir -p "$REAL_HOME/.config/labwc"
-AUTOSTART="$REAL_HOME/.config/labwc/autostart"
-
+AUTOSTART="$LABWC_DIR/autostart"
 touch "$AUTOSTART"
 
 grep -qxF "waybar &" "$AUTOSTART" || echo "waybar &" >> "$AUTOSTART"
+
+echo ""
+echo "[✓] Waybar configured successfully"
