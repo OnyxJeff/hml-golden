@@ -30,7 +30,7 @@ cat > "$DESKTOP_DIR/Windows-VM.desktop" <<EOF
 [Desktop Entry]
 Name=Windows VM (RDP)
 Exec=remmina
-Icon=remmina
+Icon=org.remmina.Remmina
 Type=Application
 Terminal=false
 EOF
@@ -44,7 +44,7 @@ PORTAL_URL="${PORTAL_URL:-https://home.onyxnethq.site}"
 cat > "$DESKTOP_DIR/Homarr-Portal.desktop" <<EOF
 [Desktop Entry]
 Name=Homarr Portal
-Exec=chromium "$PORTAL_URL"
+Exec=chromium $PORTAL_URL
 Icon=chromium
 Type=Application
 Terminal=false
