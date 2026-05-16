@@ -55,7 +55,7 @@ cp "$SELECTED_WALLPAPER" "$DEST"
 
 mkdir -p "$REAL_HOME/.config/pcmanfm/LXDE-pi"
 
-cat > "$REAL_HOME/.config/pcmanfm/LXDE-pi/desktop-items.conf" <<EOF
+cat > "$REAL_HOME/.config/pcmanfm/LXDE-pi/desktop-items-0.conf" <<EOF
 [*]
 wallpaper=$DEST
 wallpaper_mode=fit
