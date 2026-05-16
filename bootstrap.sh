@@ -5,7 +5,7 @@ set -euo pipefail
 # CONFIG
 # ============================
 
-REPO_URL="https://github.com/YOUR_USER/hml-golden.git"
+REPO_URL="https://github.com/OnyxJeff/hml-golden.git"
 REPO_NAME="hml-golden"
 BASE_DIR="$HOME"
 LOG_FILE="$HOME/hml-golden-bootstrap.log"
