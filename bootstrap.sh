@@ -218,6 +218,8 @@ ok "System configuration complete"
 # FINISH
 # ============================
 
+REAL_USER="${SUDO_USER:-$USER}"
+
 sleep 2
 section "COMPLETE"
 
@@ -231,7 +233,7 @@ echo "Recommended next steps:"
 sleep 1
 echo "  1. Review the log file for any issues."
 sleep 1
-echo "  2. run: sudo tailscale set --operator=$USER"
+echo "  2. run: sudo tailscale set --operator=$REAL_USER"
 sleep 1
 echo "  3. run: tailscale up"
 sleep 1
