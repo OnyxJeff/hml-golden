@@ -17,7 +17,6 @@ sudo apt-get upgrade -y -qq
 
 echo "[packages] installing base tools..."
 sudo apt-get install -y -qq \
-    steamlink \
     libreoffice-calc \
     remmina \
     chromium \
@@ -36,4 +35,5 @@ sudo apt-get install -y -qq \
     xterm \
     ca-certificates \
     gnupg \
-    dbus-user-session
+    dbus-user-session \
+    steamlink
