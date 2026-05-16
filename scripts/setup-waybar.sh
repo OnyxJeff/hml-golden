@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 mkdir -p "$HOME/.config/waybar"
+
+# --------------------------------------------------
+# CONFIG
+# --------------------------------------------------
 
 cat > "$HOME/.config/waybar/config.jsonc" <<EOF
 {
@@ -25,12 +31,22 @@ cat > "$HOME/.config/waybar/config.jsonc" <<EOF
 }
 EOF
 
+# --------------------------------------------------
+# SAFE TAILSCALE SCRIPT (MAJOR FIX)
+# --------------------------------------------------
+
 cat > "$HOME/.config/waybar/tailscale-status.sh" <<'EOF'
 #!/usr/bin/env bash
 
-STATUS=$(tailscale status --json 2>/dev/null)
+# Failsafe output ALWAYS returned
+if ! command -v tailscale >/dev/null 2>&1; then
+    echo '{"text":"⚪ TS","tooltip":"Tailscale not installed"}'
+    exit 0
+fi
 
-if echo "$STATUS" | jq -e '.BackendState == "Running"' >/dev/null; then
+STATUS=$(tailscale status --json 2>/dev/null || true)
+
+if command -v jq >/dev/null 2>&1 && echo "$STATUS" | jq -e '.BackendState == "Running"' >/dev/null 2>&1; then
     echo '{"text":"🟢 TS","tooltip":"Connected"}'
 else
     echo '{"text":"🔴 TS","tooltip":"Disconnected"}'
@@ -39,12 +55,13 @@ EOF
 
 chmod +x "$HOME/.config/waybar/tailscale-status.sh"
 
-mkdir -p "$HOME/.config/labwc"
+# --------------------------------------------------
+# LABWC AUTOSTART (IDEMPOTENT FIX)
+# --------------------------------------------------
 
+mkdir -p "$HOME/.config/labwc"
 AUTOSTART="$HOME/.config/labwc/autostart"
 
 touch "$AUTOSTART"
 
-if ! grep -q "waybar" "$AUTOSTART"; then
-    echo "waybar &" >> "$AUTOSTART"
-fi
+grep -qxF "waybar &" "$AUTOSTART" || echo "waybar &" >> "$AUTOSTART"

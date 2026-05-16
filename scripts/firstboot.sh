@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+
 # ============================
-# SUDO GUARD (NEW)
+# SUDO GUARD
 # ============================
+
 if [[ $EUID -ne 0 ]]; then
     echo "Re-running with sudo..."
     exec sudo -E bash "$0" "$@"
@@ -36,6 +40,10 @@ ok() {
     echo -e "${GREEN}✔${NC} $1"
 }
 
+err() {
+    echo -e "${RED}✖${NC} $1"
+}
+
 section() {
     echo ""
     echo -e "${BLUE}=========================================${NC}"
@@ -44,11 +52,11 @@ section() {
 }
 
 pause() {
-    sleep 0.5   # slightly tighter UX pacing
+    sleep 0.5
 }
 
 # ============================
-# SPINNER (kept, slightly hardened)
+# SPINNER WRAPPER (single source of truth)
 # ============================
 
 spinner() {
@@ -73,12 +81,13 @@ run_with_spinner() {
     local msg=$1
     shift
 
-    # HARDENED: silence EVERYTHING from wrapped command
-    "$@" > /dev/null 2>&1 &
+    timeout 300 "$@" > /dev/null 2>&1 &
     local pid=$!
 
     spinner "$pid" "$msg"
+
     wait "$pid"
+    return $?
 }
 
 # ============================
@@ -86,68 +95,51 @@ run_with_spinner() {
 # ============================
 
 section "FIRSTBOOT CONFIGURATION"
-
 echo -e "${CYAN}Starting system configuration...${NC}"
 pause
 
 # ============================
-# STEP 1 - PACKAGES
+# STEP 1 - PACKAGES (NOW MODULE-DRIVEN)
 # ============================
 
 section "SYSTEM PACKAGES"
+step "Running package installer"
 
-run_with_spinner "Updating package lists" bash -c '
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get update -qq
-'
-
-run_with_spinner "Upgrading packages" bash -c '
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get upgrade -y -qq
-'
-
-run_with_spinner "Cleaning up packages" bash -c '
-    apt-get autoremove -y -qq
-'
-
-step "Installing core apps"
-
-run_with_spinner "Installing LibreOffice" apt-get install -y -qq libreoffice
-run_with_spinner "Installing Remmina" apt-get install -y -qq remmina
-run_with_spinner "Installing Chromium" apt-get install -y -qq chromium
-
-# Steam Link often lives outside default repos depending on distro
-run_with_spinner "Installing Steam Link" bash -c 'apt-get install -y -qq steamlink' || true
-
-ok "Core applications installed"
+if [[ -f "$HOME/hml-golden/scripts/install-packages.sh" ]]; then
+    run_with_spinner "Installing system packages" bash "$HOME/hml-golden/scripts/install-packages.sh"
+    ok "System packages installed"
+else
+    err "install-packages.sh missing"
+    exit 1
+fi
 
 # ============================
-# STEP 2 - TAILSCALE
+# STEP 2 - TAILSCALE (MODULE)
 # ============================
 
 section "TAILSCALE"
-
 step "Installing Tailscale"
 
-run_with_spinner "Installing Tailscale" bash -c '
-    curl -fsSL https://tailscale.com/install.sh | bash
-'
-
-ok "Tailscale installed (run 'sudo tailscale up' if needed)"
+if [[ -f "$HOME/hml-golden/scripts/setup-tailscale.sh" ]]; then
+    run_with_spinner "Setting up Tailscale" bash "$HOME/hml-golden/scripts/setup-tailscale.sh"
+    ok "Tailscale configured"
+else
+    err "setup-tailscale.sh missing"
+    exit 1
+fi
 
 # ============================
 # STEP 3 - SSH CONFIG
 # ============================
 
 section "SSH CONFIGURATION"
-
 step "Applying SSH configuration"
 
-if [ -f "$HOME/hml-golden/scripts/setup-ssh.sh" ]; then
+if [[ -f "$HOME/hml-golden/scripts/setup-ssh.sh" ]]; then
     run_with_spinner "Configuring SSH" bash "$HOME/hml-golden/scripts/setup-ssh.sh"
     ok "SSH configured"
 else
-    echo -e "${YELLOW}⚠ SSH script not found (skipping)${NC}"
+    err "setup-ssh.sh missing"
 fi
 
 # ============================
@@ -155,30 +147,32 @@ fi
 # ============================
 
 section "RDP PROFILES"
-
 step "Setting up Remmina profiles"
 
-if [ -f "$HOME/hml-golden/scripts/setup-remmina.sh" ]; then
+if [[ -f "$HOME/hml-golden/scripts/setup-remmina.sh" ]]; then
     run_with_spinner "Configuring Remmina" bash "$HOME/hml-golden/scripts/setup-remmina.sh"
     ok "Remmina configured"
 else
-    echo -e "${YELLOW}⚠ Remmina script not found (skipping)${NC}"
+    err "setup-remmina.sh missing"
 fi
 
 # ============================
-# STEP 5 - DESKTOP SETUP
+# STEP 5 - DESKTOP CONFIG
 # ============================
 
 section "DESKTOP CONFIG"
-
 step "Applying desktop configuration"
 
-if [ -f "$HOME/hml-golden/scripts/setup-theme.sh" ]; then
-    run_with_spinner "Applying theme" bash "$HOME/hml-golden/scripts/setup-theme.sh"
+if [[ -f "$HOME/hml-golden/scripts/setup-theme.sh" ]]; then
+    run_with_spinner "Applying theme" timeout 60 bash "$HOME/hml-golden/scripts/setup-theme.sh" || true
 fi
 
-if [ -f "$HOME/hml-golden/scripts/setup-wallpaper.sh" ]; then
-    run_with_spinner "Setting wallpaper" bash "$HOME/hml-golden/scripts/setup-wallpaper.sh"
+if [[ -f "$HOME/hml-golden/scripts/setup-wallpaper.sh" ]]; then
+    run_with_spinner "Setting wallpaper" timeout 60 bash "$HOME/hml-golden/scripts/setup-wallpaper.sh" || true
+fi
+
+if [[ -f "$HOME/hml-golden/scripts/setup-waybar.sh" ]]; then
+    run_with_spinner "Configuring Waybar" bash "$HOME/hml-golden/scripts/setup-waybar.sh" || true
 fi
 
 ok "Desktop configured"
@@ -188,6 +182,6 @@ ok "Desktop configured"
 # ============================
 
 section "COMPLETE"
-
 echo ""
 echo -e "${GREEN}✔ Firstboot completed successfully${NC}"
+exit 0

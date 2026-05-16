@@ -19,4 +19,12 @@ sudo apt install -y \
     jq \
     waybar \
     unclutter \
-    xterm
+    dbus-user-session \
+    ca-certificates \
+    gnupg \
+    software-properties-common \
+    rsync \
+    fzf \
+    ncdu \
+    iotop \
+    net-tools

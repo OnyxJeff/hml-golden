@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 echo ""
 echo "========================================="
@@ -13,9 +13,9 @@ echo "========================================="
 
 echo "[*] Installing dark themes..."
 
-sudo apt install -y \
+sudo apt-get install -y \
     arc-theme \
-    papirus-icon-theme
+    papirus-icon-theme > /dev/null 2>&1
 
 # GTK3 config directory
 mkdir -p "$HOME/.config/gtk-3.0"
@@ -29,7 +29,7 @@ gtk-application-prefer-dark-theme=1
 EOF
 
 # --------------------------------------------------
-# QT DARK THEME (helps some apps behave)
+# QT DARK THEME
 # --------------------------------------------------
 
 mkdir -p "$HOME/.config/qt5ct"
@@ -69,29 +69,18 @@ window#waybar {
 }
 EOF
 
-# --------------------------------------------------
-# WAYBAR POSITION + SIZE
-# --------------------------------------------------
-
 cat > "$HOME/.config/waybar/config.jsonc" <<EOF
 {
   "layer": "top",
   "position": "bottom",
   "height": 24,
-
-  "modules-left": [
-    "clock"
-  ],
-
-  "modules-right": [
-    "custom/tailscale"
-  ],
+  "modules-left": ["clock"],
+  "modules-right": ["custom/tailscale"],
 
   "custom/tailscale": {
     "exec": "~/.config/waybar/tailscale-status.sh",
     "interval": 10,
-    "return-type": "json",
-    "on-click": "gnome-terminal -- tailscale status"
+    "return-type": "json"
   },
 
   "clock": {
@@ -100,53 +89,5 @@ cat > "$HOME/.config/waybar/config.jsonc" <<EOF
 }
 EOF
 
-# --------------------------------------------------
-# DESKTOP ICON SIZING / APPEARANCE
-# --------------------------------------------------
-
-echo "[*] Configuring desktop appearance..."
-
-mkdir -p "$HOME/.config/pcmanfm/LXDE-pi"
-
-cat > "$HOME/.config/pcmanfm/LXDE-pi/desktop-items-0.conf" <<EOF
-[*]
-desktop_bg=#000000
-desktop_fg=#ffffff
-desktop_shadow=#000000
-wallpaper_mode=fit
-show_wm_menu=0
-desktop_font=Sans 10
-EOF
-
-# --------------------------------------------------
-# CHROMIUM DARK MODE
-# --------------------------------------------------
-
-echo "[*] Enabling Chromium dark mode..."
-
-mkdir -p "$HOME/.config/chromium-flags.conf.d"
-
-cat > "$HOME/.config/chromium-flags.conf" <<EOF
---force-dark-mode
---enable-features=WebUIDarkMode
-EOF
-
-# --------------------------------------------------
-# CURSOR CLEANUP
-# --------------------------------------------------
-
-mkdir -p "$HOME/.icons/default"
-
-cat > "$HOME/.icons/default/index.theme" <<EOF
-[Icon Theme]
-Inherits=Adwaita
-EOF
-
-# --------------------------------------------------
-# COMPLETE
-# --------------------------------------------------
-
 echo ""
 echo "[✓] Theme configuration complete."
-echo ""
-echo "Reboot recommended."

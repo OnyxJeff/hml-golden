@@ -10,6 +10,9 @@ REPO_NAME="hml-golden"
 BASE_DIR="$HOME"
 LOG_FILE="$HOME/hml-golden-bootstrap.log"
 
+# Prevent Git credential prompts (IMPORTANT)
+export GIT_TERMINAL_PROMPT=0
+
 # ============================
 # LOGGING
 # ============================
@@ -50,16 +53,16 @@ ok() {
     echo -e "${GREEN}✔${NC} $1"
 }
 
-fail() {
+err() {
     echo -e "${RED}✖${NC} $1"
 }
 
 pause() {
-    sleep 1
+    sleep 0.5
 }
 
 # ============================
-# SPINNER
+# SPINNER (hardened)
 # ============================
 
 spinner() {
@@ -71,12 +74,12 @@ spinner() {
 
     while kill -0 "$pid" 2>/dev/null; do
         for i in $(seq 0 9); do
-            echo -ne "\b${spin:$i:1}"
+            printf "\b%s" "${spin:$i:1}"
             sleep 0.1
         done
     done
 
-    echo -ne "\b"
+    printf "\b"
     echo -e "${GREEN}✔${NC}"
 }
 
@@ -84,7 +87,8 @@ run_with_spinner() {
     local msg=$1
     shift
 
-    "$@" &
+    # HARDENED: silence EVERYTHING
+    "$@" > /dev/null 2>&1 &
     local pid=$!
 
     spinner "$pid" "$msg"
@@ -98,6 +102,7 @@ run_with_spinner() {
 section "HML-GOLDEN BOOTSTRAP"
 
 echo -e "${CYAN}Log file:${NC} $LOG_FILE"
+pause
 
 # ============================
 # STEP 1 - DEPENDENCIES
@@ -107,14 +112,21 @@ section "SYSTEM CHECKS"
 
 step "Checking dependencies"
 
+# Single silent apt update (avoid spam)
+run_with_spinner "Refreshing package index" bash -c '
+    apt-get update -qq
+'
+
 command -v git >/dev/null 2>&1 || {
-    run_with_spinner "Installing git" sudo apt update
-    run_with_spinner "Installing git" sudo apt install -y git
+    run_with_spinner "Installing git" bash -c '
+        apt-get install -y -qq git
+    '
 }
 
 command -v curl >/dev/null 2>&1 || {
-    run_with_spinner "Installing curl" sudo apt update
-    run_with_spinner "Installing curl" sudo apt install -y curl
+    run_with_spinner "Installing curl" bash -c '
+        apt-get install -y -qq curl
+    '
 }
 
 ok "Dependencies ready"
@@ -127,24 +139,22 @@ section "REPOSITORY SETUP"
 
 cd "$BASE_DIR"
 
-export GIT_TERMINAL_PROMPT=0
-
 step "Checking repository access"
+
 if ! git ls-remote "$REPO_URL" >/dev/null 2>&1; then
     err "Cannot access repo: $REPO_URL"
-    err "Repo is likely private or URL is wrong"
+    err "Likely: private repo, wrong URL, or missing access"
     exit 1
 fi
 
 step "Cloning repository"
+
 if [ ! -d "$REPO_NAME" ]; then
-    run_with_spinner "Cloning repository" \
-    git clone --depth 1 "$REPO_URL"
+    run_with_spinner "Cloning repository" git clone --depth 1 "$REPO_URL"
 else
     step "Updating repository"
     cd "$REPO_NAME"
-    run_with_spinner "Pulling latest changes" \
-    git pull --ff-only
+    run_with_spinner "Pulling latest changes" git pull --ff-only
     cd "$BASE_DIR"
 fi
 
@@ -161,7 +171,7 @@ section "VALIDATION"
 step "Checking project structure"
 
 if [ ! -f "scripts/firstboot.sh" ]; then
-    fail "Missing scripts/firstboot.sh"
+    err "Missing scripts/firstboot.sh"
     exit 1
 fi
 
@@ -175,7 +185,16 @@ section "SYSTEM CONFIGURATION"
 
 step "Running firstboot configuration"
 
-run_with_spinner "Executing firstboot.sh" bash scripts/firstboot.sh
+FIRSTBOOT_LOG="$HOME/firstboot.log"
+
+# Run firstboot directly (no spinner, no subshell)
+bash scripts/firstboot.sh 2>&1 | tee "$FIRSTBOOT_LOG"
+rc=${PIPESTATUS[0]}
+
+if [[ $rc -ne 0 ]]; then
+    err "firstboot.sh failed (exit $rc)"
+    exit $rc
+fi
 
 ok "System configuration complete"
 

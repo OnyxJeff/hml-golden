@@ -1,25 +1,35 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 echo ""
 echo "========================================="
 echo " Configuring Modular SSH"
 echo "========================================="
 
-# Create structure
 mkdir -p "$HOME/.ssh/config.d"
 mkdir -p "$HOME/Homelab-SSH"
 
-# Copy main config
-cp "$(dirname "$0")/../ssh-config/config" "$HOME/.ssh/config"
+# --------------------------------------------------
+# MAIN CONFIG (SAFE CHECK ADDED)
+# --------------------------------------------------
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASE_CONFIG="$SCRIPT_DIR/../ssh-config/config"
+
+if [[ -f "$BASE_CONFIG" ]]; then
+    cp "$BASE_CONFIG" "$HOME/.ssh/config"
+else
+    echo "[!] Missing base SSH config, skipping copy"
+fi
 
 chmod 700 "$HOME/.ssh"
+touch "$HOME/.ssh/config"
 chmod 600 "$HOME/.ssh/config"
 
-# -------------------------
+# --------------------------------------------------
 # CORE SERVERS
-# -------------------------
+# --------------------------------------------------
 
 cat > "$HOME/.ssh/config.d/core.conf" <<EOF
 # Core Infrastructure
@@ -37,9 +47,9 @@ Host vanir
     User root
 EOF
 
-# -------------------------
+# --------------------------------------------------
 # COMPUTE NODES
-# -------------------------
+# --------------------------------------------------
 
 cat > "$HOME/.ssh/config.d/compute.conf" <<EOF
 # Compute Cluster
@@ -77,22 +87,17 @@ Host simc
     User root
 EOF
 
-# -------------------------
-# OPTIONAL FUTURE CATEGORY
-# -------------------------
+# --------------------------------------------------
+# GAMING (unchanged)
+# --------------------------------------------------
 
-cat > "$HOME/.ssh/config.d/gaming.conf" <<EOF
+cat > "$HOME/config.d/gaming.conf" <<EOF
 # Gaming / Media Nodes
-# (expand later)
-
-# Host gaming-pc
-#     HostName 10.100.0.X
-#     User jeff
 EOF
 
-# -------------------------
-# USER NOTES
-# -------------------------
+# --------------------------------------------------
+# README
+# --------------------------------------------------
 
 cat > "$HOME/Homelab-SSH/README.txt" <<EOF
 SSH Aliases Available:

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 echo ""
 echo "========================================="
@@ -29,19 +29,23 @@ sound=local
 EOF
 
 # --------------------------------------------------
-# Desktop shortcuts (click to launch directly)
+# Desktop shortcut (SAFE GUARD ADDED)
 # --------------------------------------------------
 
-cat > "$HOME/Desktop/SimC-VM.desktop" <<EOF
+if command -v remmina >/dev/null 2>&1; then
+    cat > "$HOME/Desktop/SimC-VM.desktop" <<EOF
 [Desktop Entry]
 Name=SimulationCraft VM
-Exec=remmina -c $HOME/.local/share/remmina/simc-vm.remmina
+Exec=remmina -c "$HOME/.local/share/remmina/simc-vm.remmina"
 Icon=remmina
 Type=Application
 Terminal=false
 EOF
 
-chmod +x "$HOME/Desktop/"*.desktop
+    chmod +x "$HOME/Desktop/SimC-VM.desktop"
+else
+    echo "[!] Remmina not installed, skipping desktop shortcut"
+fi
 
 echo ""
 echo "[✓] Remmina profiles installed."

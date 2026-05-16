@@ -1,57 +1,55 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WALLPAPER_DIR="$SCRIPT_DIR/../wallpapers"
 
+DEFAULT_WALLPAPER="homelab-default.jpg"
+SELECTED_WALLPAPER="$WALLPAPER_DIR/$DEFAULT_WALLPAPER"
+
 echo ""
 echo "========================================="
-echo " Wallpaper Selection"
+echo " Wallpaper Setup (Default Mode)"
 echo "========================================="
 echo ""
 
-# Build wallpaper list
-mapfile -t WALLPAPERS < <(find "$WALLPAPER_DIR" -maxdepth 1 \( -iname "*.jpg" -o -iname "*.png" \) | sort)
+# --------------------------------------------------
+# Validate default wallpaper exists
+# --------------------------------------------------
 
-# Check if wallpapers exist
-if [ ${#WALLPAPERS[@]} -eq 0 ]; then
-    echo "[!] No wallpapers found in:"
-    echo "    $WALLPAPER_DIR"
-    exit 1
+if [[ ! -f "$SELECTED_WALLPAPER" ]]; then
+    echo "[!] Default wallpaper not found:"
+    echo "    $SELECTED_WALLPAPER"
+    echo "[!] Falling back to first available image..."
+
+    SELECTED_WALLPAPER=$(find "$WALLPAPER_DIR" -maxdepth 1 \
+        \( -iname "*.jpg" -o -iname "*.png" \) | sort | head -n 1)
+
+    if [[ -z "$SELECTED_WALLPAPER" ]]; then
+        echo "[!] No wallpapers available. Exiting."
+        exit 1
+    fi
 fi
 
-# Display wallpapers
-for i in "${!WALLPAPERS[@]}"; do
-    BASENAME=$(basename "${WALLPAPERS[$i]}")
-    echo "[$((i+1))] $BASENAME"
-done
-
-echo ""
-read -rp "Choose wallpaper number: " CHOICE
-
-INDEX=$((CHOICE - 1))
-
-# Validate selection
-if [ ! "${WALLPAPERS[$INDEX]+exists}" ]; then
-    echo "[!] Invalid selection."
-    exit 1
-fi
-
-SELECTED_WALLPAPER="${WALLPAPERS[$INDEX]}"
-
-echo ""
 echo "[*] Using wallpaper:"
 echo "    $(basename "$SELECTED_WALLPAPER")"
 
-# Destination
+# --------------------------------------------------
+# Copy wallpaper into user space
+# --------------------------------------------------
+
 mkdir -p "$HOME/Pictures"
 
-DEST="$HOME/Pictures/homelab-wallpaper$(basename "$SELECTED_WALLPAPER" | sed 's/.*\(\.[^.]*\)$/\1/')"
+EXT="${SELECTED_WALLPAPER##*.}"
+DEST="$HOME/Pictures/homelab-wallpaper.$EXT"
 
 cp "$SELECTED_WALLPAPER" "$DEST"
 
-# Configure wallpaper
+# --------------------------------------------------
+# Apply wallpaper (LXDE / pcmanfm)
+# --------------------------------------------------
+
 mkdir -p "$HOME/.config/pcmanfm/LXDE-pi"
 
 cat > "$HOME/.config/pcmanfm/LXDE-pi/desktop-items-0.conf" <<EOF
@@ -62,4 +60,4 @@ desktop_bg=#000000
 EOF
 
 echo ""
-echo "[✓] Wallpaper configured."
+echo "[✓] Wallpaper configured successfully."
