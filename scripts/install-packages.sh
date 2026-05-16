@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-sudo apt update
-sudo apt full-upgrade -y
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+export APT_LISTCHANGES_FRONTEND=none
 
-sudo apt install -y \
+echo "[packages] updating..."
+apt-get update -y -qq
+
+echo "[packages] upgrading..."
+apt-get upgrade -y -qq
+
+echo "[packages] installing base tools..."
+apt-get install -y -qq \
     libreoffice-calc \
     remmina \
     chromium \
@@ -19,12 +28,7 @@ sudo apt install -y \
     jq \
     waybar \
     unclutter \
-    dbus-user-session \
+    xterm \
     ca-certificates \
     gnupg \
-    software-properties-common \
-    rsync \
-    fzf \
-    ncdu \
-    iotop \
-    net-tools
+    dbus-user-session
