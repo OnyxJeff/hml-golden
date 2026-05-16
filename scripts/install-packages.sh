@@ -6,17 +6,17 @@ export NEEDRESTART_MODE=a
 export APT_LISTCHANGES_FRONTEND=none
 
 echo "[packages] fixing dpkg state if needed..."
-dpkg --configure -a || true
-sudo apt-get install -f -y || true
+sudo dpkg --configure -a || true
+sudo apt install -f -y || true
 
 echo "[packages] updating..."
-sudo apt-get update -y -qq
+sudo apt update -y -qq
 
 echo "[packages] upgrading..."
-sudo apt-get upgrade -y -qq
+sudo apt upgrade -y -qq
 
 echo "[packages] installing base tools..."
-sudo apt-get install -y -qq \
+sudo apt install -y -qq \
     libreoffice-calc \
     remmina \
     chromium \
