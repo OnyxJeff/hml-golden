@@ -2,7 +2,10 @@
 
 set -euo pipefail
 
-DESKTOP_DIR="$HOME/Desktop"
+REAL_USER="${SUDO_USER:-$USER}"
+REAL_HOME="$(eval echo "~$REAL_USER")"
+
+DESKTOP_DIR="$REAL_HOME/Desktop"
 
 mkdir -p "$DESKTOP_DIR"
 

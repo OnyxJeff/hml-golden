@@ -106,7 +106,7 @@ section "SYSTEM PACKAGES"
 step "Running package installer"
 
 if [[ -f "$HOME/hml-golden/scripts/install-packages.sh" ]]; then
-    run_with_spinner "Installing system packages" bash "$HOME/hml-golden/scripts/install-packages.sh"
+    run_with_spinner "Installing system packages " bash "$HOME/hml-golden/scripts/install-packages.sh"
     ok "System packages installed"
 else
     err "install-packages.sh missing"
@@ -121,7 +121,7 @@ section "TAILSCALE"
 step "Installing Tailscale"
 
 if [[ -f "$HOME/hml-golden/scripts/setup-tailscale.sh" ]]; then
-    run_with_spinner "Setting up Tailscale" bash "$HOME/hml-golden/scripts/setup-tailscale.sh"
+    run_with_spinner "Setting up Tailscale " bash "$HOME/hml-golden/scripts/setup-tailscale.sh"
     ok "Tailscale configured"
 else
     err "setup-tailscale.sh missing"
@@ -136,7 +136,7 @@ section "SSH CONFIGURATION"
 step "Applying SSH configuration"
 
 if [[ -f "$HOME/hml-golden/scripts/setup-ssh.sh" ]]; then
-    run_with_spinner "Configuring SSH" bash "$HOME/hml-golden/scripts/setup-ssh.sh"
+    run_with_spinner "Configuring SSH " bash "$HOME/hml-golden/scripts/setup-ssh.sh"
     ok "SSH configured"
 else
     err "setup-ssh.sh missing"

@@ -2,13 +2,16 @@
 
 set -euo pipefail
 
-mkdir -p "$HOME/.config/waybar"
+REAL_USER="${SUDO_USER:-$USER}"
+REAL_HOME="$(eval echo "~$REAL_USER")"
+
+mkdir -p "$REAL_HOME/.config/waybar"
 
 # --------------------------------------------------
 # CONFIG
 # --------------------------------------------------
 
-cat > "$HOME/.config/waybar/config.jsonc" <<EOF
+cat > "$REAL_HOME/.config/waybar/config.jsonc" <<EOF
 {
   "layer": "top",
   "position": "top",
@@ -35,7 +38,7 @@ EOF
 # SAFE TAILSCALE SCRIPT (MAJOR FIX)
 # --------------------------------------------------
 
-cat > "$HOME/.config/waybar/tailscale-status.sh" <<'EOF'
+cat > "$REAL_HOME/.config/waybar/tailscale-status.sh" <<'EOF'
 #!/usr/bin/env bash
 
 # Failsafe output ALWAYS returned
@@ -53,14 +56,14 @@ else
 fi
 EOF
 
-chmod +x "$HOME/.config/waybar/tailscale-status.sh"
+chmod +x "$REAL_HOME/.config/waybar/tailscale-status.sh"
 
 # --------------------------------------------------
 # LABWC AUTOSTART (IDEMPOTENT FIX)
 # --------------------------------------------------
 
-mkdir -p "$HOME/.config/labwc"
-AUTOSTART="$HOME/.config/labwc/autostart"
+mkdir -p "$REAL_HOME/.config/labwc"
+AUTOSTART="$REAL_HOME/.config/labwc/autostart"
 
 touch "$AUTOSTART"
 

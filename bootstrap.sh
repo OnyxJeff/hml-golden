@@ -125,7 +125,7 @@ section "SYSTEM CHECKS"
 step "Checking dependencies"
 
 # Single silent apt update (avoid spam)
-run_with_spinner "Refreshing package index" bash -c '
+run_with_spinner "Refreshing package index " bash -c '
     sudo apt-get update -qq
 '
 
@@ -167,7 +167,7 @@ if [ ! -d "$REPO_NAME" ]; then
 else
     step "Updating repository"
     cd "$REPO_NAME"
-    run_with_spinner "Pulling latest changes" git pull --ff-only
+    run_with_spinner "Pulling latest changes " git pull --ff-only
     cd "$BASE_DIR"
 fi
 

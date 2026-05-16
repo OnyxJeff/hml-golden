@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+REAL_USER="${SUDO_USER:-$USER}"
+REAL_HOME="$(eval echo "~$REAL_USER")"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WALLPAPER_DIR="$SCRIPT_DIR/../wallpapers"
 
@@ -39,10 +42,10 @@ echo "    $(basename "$SELECTED_WALLPAPER")"
 # Copy wallpaper into user space
 # --------------------------------------------------
 
-mkdir -p "$HOME/Pictures"
+mkdir -p "$REAL_HOME/Pictures"
 
 EXT="${SELECTED_WALLPAPER##*.}"
-DEST="$HOME/Pictures/homelab-wallpaper.$EXT"
+DEST="$REAL_HOME/Pictures/homelab-wallpaper.$EXT"
 
 cp "$SELECTED_WALLPAPER" "$DEST"
 
@@ -50,9 +53,9 @@ cp "$SELECTED_WALLPAPER" "$DEST"
 # Apply wallpaper (LXDE / pcmanfm)
 # --------------------------------------------------
 
-mkdir -p "$HOME/.config/pcmanfm/LXDE-pi"
+mkdir -p "$REAL_HOME/.config/pcmanfm/LXDE-pi"
 
-cat > "$HOME/.config/pcmanfm/LXDE-pi/desktop-items-0.conf" <<EOF
+cat > "$REAL_HOME/.config/pcmanfm/LXDE-pi/desktop-items.conf" <<EOF
 [*]
 wallpaper=$DEST
 wallpaper_mode=fit

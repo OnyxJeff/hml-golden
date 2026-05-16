@@ -7,14 +7,17 @@ echo "========================================="
 echo " Setting up Remmina RDP Profiles"
 echo "========================================="
 
-mkdir -p "$HOME/.local/share/remmina"
-mkdir -p "$HOME/Desktop"
+REAL_USER="${SUDO_USER:-$USER}"
+REAL_HOME="$(eval echo "~$REAL_USER")"
+
+mkdir -p "$REAL_HOME/.local/share/remmina"
+mkdir -p "$REAL_HOME/Desktop"
 
 # --------------------------------------------------
 # SimulationCraft VM
 # --------------------------------------------------
 
-cat > "$HOME/.local/share/remmina/simc-vm.remmina" <<EOF
+cat > "$REAL_HOME/.local/share/remmina/simc-vm.remmina" <<EOF
 [remmina]
 name=SimulationCraft VM
 protocol=RDP
@@ -33,16 +36,16 @@ EOF
 # --------------------------------------------------
 
 if command -v remmina >/dev/null 2>&1; then
-    cat > "$HOME/Desktop/SimC-VM.desktop" <<EOF
+    cat > "$REAL_HOME/Desktop/SimC-VM.desktop" <<EOF
 [Desktop Entry]
 Name=SimulationCraft VM
-Exec=remmina -c "$HOME/.local/share/remmina/simc-vm.remmina"
+Exec=remmina -c "$REAL_HOME/.local/share/remmina/simc-vm.remmina"
 Icon=remmina
 Type=Application
 Terminal=false
 EOF
 
-    chmod +x "$HOME/Desktop/SimC-VM.desktop"
+    chmod +x "$REAL_HOME/Desktop/SimC-VM.desktop"
 else
     echo "[!] Remmina not installed, skipping desktop shortcut"
 fi

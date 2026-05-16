@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
 
 echo ""
@@ -7,31 +6,34 @@ echo "========================================="
 echo " Configuring Modular SSH"
 echo "========================================="
 
-mkdir -p "$HOME/.ssh/config.d"
-mkdir -p "$HOME/Homelab-SSH"
+REAL_USER="${SUDO_USER:-$USER}"
+REAL_HOME="$(eval echo "~$REAL_USER")"
+
+mkdir -p "$REAL_HOME/.ssh/config.d"
+mkdir -p "$REAL_HOME/Homelab-SSH"
 
 # --------------------------------------------------
-# MAIN CONFIG (SAFE CHECK ADDED)
+# MAIN CONFIG
 # --------------------------------------------------
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BASE_CONFIG="$SCRIPT_DIR/../ssh-config/config"
 
 if [[ -f "$BASE_CONFIG" ]]; then
-    cp "$BASE_CONFIG" "$HOME/.ssh/config"
+    cp "$BASE_CONFIG" "$REAL_HOME/.ssh/config"
 else
     echo "[!] Missing base SSH config, skipping copy"
 fi
 
-chmod 700 "$HOME/.ssh"
-touch "$HOME/.ssh/config"
-chmod 600 "$HOME/.ssh/config"
+chmod 700 "$REAL_HOME/.ssh"
+touch "$REAL_HOME/.ssh/config"
+chmod 600 "$REAL_HOME/.ssh/config"
 
 # --------------------------------------------------
 # CORE SERVERS
 # --------------------------------------------------
 
-cat > "$HOME/.ssh/config.d/core.conf" <<EOF
+cat > "$REAL_HOME/.ssh/config.d/core.conf" <<EOF
 # Core Infrastructure
 
 Host truenas
@@ -51,7 +53,7 @@ EOF
 # COMPUTE NODES
 # --------------------------------------------------
 
-cat > "$HOME/.ssh/config.d/compute.conf" <<EOF
+cat > "$REAL_HOME/.ssh/config.d/compute.conf" <<EOF
 # Compute Cluster
 
 Host pp0
@@ -88,10 +90,10 @@ Host simc
 EOF
 
 # --------------------------------------------------
-# GAMING (unchanged)
+# GAMING
 # --------------------------------------------------
 
-cat > "$HOME/config.d/gaming.conf" <<EOF
+cat > "$REAL_HOME/.ssh/config.d/gaming.conf" <<EOF
 # Gaming / Media Nodes
 EOF
 
@@ -99,7 +101,7 @@ EOF
 # README
 # --------------------------------------------------
 
-cat > "$HOME/Homelab-SSH/README.txt" <<EOF
+cat > "$REAL_HOME/Homelab-SSH/README.txt" <<EOF
 SSH Aliases Available:
 
 Core:
