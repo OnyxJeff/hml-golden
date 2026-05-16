@@ -8,10 +8,12 @@ export APT_LISTCHANGES_FRONTEND=none
 # CONFIG
 # ============================
 
+REAL_USER="${SUDO_USER:-$USER}"
+REAL_HOME="$(eval echo "~$REAL_USER")"
 REPO_URL="https://github.com/OnyxJeff/hml-golden.git"
 REPO_NAME="hml-golden"
-BASE_DIR="$HOME"
-LOG_FILE="$HOME/hml-golden-bootstrap.log"
+BASE_DIR="$REAL_HOME"
+LOG_FILE="$REAL_HOME/hml-golden-bootstrap.log"
 
 # Prevent Git credential prompts (IMPORTANT)
 export GIT_TERMINAL_PROMPT=0
@@ -217,8 +219,6 @@ ok "System configuration complete"
 # ============================
 # FINISH
 # ============================
-
-REAL_USER="${SUDO_USER:-$USER}"
 
 sleep 2
 section "COMPLETE"
