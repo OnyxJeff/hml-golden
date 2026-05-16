@@ -150,7 +150,7 @@ section "RDP PROFILES"
 step "Setting up Remmina profiles"
 
 if [[ -f "$HOME/hml-golden/scripts/setup-remmina.sh" ]]; then
-    run_with_spinner "Configuring Remmina" bash "$HOME/hml-golden/scripts/setup-remmina.sh"
+    run_with_spinner "Configuring Remmina " bash "$HOME/hml-golden/scripts/setup-remmina.sh"
     ok "Remmina configured"
 else
     err "setup-remmina.sh missing"
@@ -164,15 +164,15 @@ section "DESKTOP CONFIG"
 step "Applying desktop configuration"
 
 if [[ -f "$HOME/hml-golden/scripts/setup-theme.sh" ]]; then
-    run_with_spinner "Applying theme" timeout 60 bash "$HOME/hml-golden/scripts/setup-theme.sh" || true
+    run_with_spinner "Applying theme " timeout 60 bash "$HOME/hml-golden/scripts/setup-theme.sh" || true
 fi
 
 if [[ -f "$HOME/hml-golden/scripts/setup-wallpaper.sh" ]]; then
-    run_with_spinner "Setting wallpaper" timeout 60 bash "$HOME/hml-golden/scripts/setup-wallpaper.sh" || true
+    run_with_spinner "Setting wallpaper " timeout 60 bash "$HOME/hml-golden/scripts/setup-wallpaper.sh" || true
 fi
 
 if [[ -f "$HOME/hml-golden/scripts/setup-waybar.sh" ]]; then
-    run_with_spinner "Configuring Waybar" bash "$HOME/hml-golden/scripts/setup-waybar.sh" || true
+    run_with_spinner "Configuring Waybar " bash "$HOME/hml-golden/scripts/setup-waybar.sh" || true
 fi
 
 ok "Desktop configured"
