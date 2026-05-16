@@ -87,9 +87,19 @@ pause
 
 section "SYSTEM PACKAGES"
 
-step "Updating package lists"
+run_with_spinner "Updating package lists" bash -c "
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -qq
+"
 
-run_with_spinner "Updating apt cache" sudo apt update
+run_with_spinner "Upgrading packages" bash -c "
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get upgrade -y -qq
+"
+
+run_with_spinner "Cleaning up packages" bash -c "
+    apt-get autoremove -y -qq
+"
 
 step "Installing core apps"
 
