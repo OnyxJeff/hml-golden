@@ -13,6 +13,15 @@ LOG_FILE="$HOME/hml-golden-bootstrap.log"
 # Prevent Git credential prompts (IMPORTANT)
 export GIT_TERMINAL_PROMPT=0
 
+# Requesting sudo upfront (for better UX later)
+if [[ $EUID -ne 0 ]]; then
+    echo "Requesting sudo once for system operations..."
+    sudo -v
+fi
+
+# keep sudo alive during script
+while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+
 # ============================
 # LOGGING
 # ============================
@@ -129,6 +138,7 @@ command -v curl >/dev/null 2>&1 || {
     '
 }
 
+sleep 2
 ok "Dependencies ready"
 
 # ============================
@@ -160,6 +170,7 @@ fi
 
 cd "$BASE_DIR/$REPO_NAME"
 
+sleep 2
 ok "Repository ready"
 
 # ============================
@@ -175,6 +186,7 @@ if [ ! -f "scripts/firstboot.sh" ]; then
     exit 1
 fi
 
+sleep 2
 ok "Structure valid"
 
 # ============================
@@ -196,23 +208,33 @@ if [[ $rc -ne 0 ]]; then
     exit $rc
 fi
 
+sleep 2
 ok "System configuration complete"
 
 # ============================
 # FINISH
 # ============================
 
+sleep 2
 section "COMPLETE"
 
+sleep 2
 echo ""
 echo -e "${GREEN}✔ Bootstrap finished successfully${NC}"
 echo -e "${CYAN}✔ Log:${NC} $LOG_FILE"
 echo ""
+sleep 2
 echo "Recommended next steps:"
+sleep 1
 echo "  1. Review the log file for any issues."
+sleep 1
 echo "  2. run: sudo tailscale set --operator=$USER"
+sleep 1
 echo "  3. run: tailscale up"
+sleep 1
 echo "  4. Authenticate to your tailnet"
+sleep 1
 echo "  5. Reboot the system to apply all changes."
+sleep 1
 echo "  6. Enjoy your new Pi workstation!"
 echo ""

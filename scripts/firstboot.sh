@@ -9,8 +9,8 @@ export NEEDRESTART_MODE=a
 # ============================
 
 if [[ $EUID -ne 0 ]]; then
-    echo "Re-running with sudo..."
-    exec sudo -E bash "$0" "$@"
+    echo "ERROR: firstboot must be run as root (called by bootstrap)"
+    exit 1
 fi
 
 # ============================
