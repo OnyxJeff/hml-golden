@@ -2,6 +2,14 @@
 set -euo pipefail
 
 # ============================
+# SUDO GUARD (NEW)
+# ============================
+if [[ $EUID -ne 0 ]]; then
+    echo "Re-running with sudo..."
+    exec sudo -E bash "$0" "$@"
+fi
+
+# ============================
 # COLORS
 # ============================
 
@@ -36,11 +44,11 @@ section() {
 }
 
 pause() {
-    sleep 1
+    sleep 0.5   # slightly tighter UX pacing
 }
 
 # ============================
-# SPINNER (shared style)
+# SPINNER (kept, slightly hardened)
 # ============================
 
 spinner() {
@@ -52,12 +60,12 @@ spinner() {
 
     while kill -0 "$pid" 2>/dev/null; do
         for i in $(seq 0 9); do
-            echo -ne "\b${spin:$i:1}"
+            printf "\b%s" "${spin:$i:1}"
             sleep 0.1
         done
     done
 
-    echo -ne "\b"
+    printf "\b"
     echo -e "${GREEN}✔${NC}"
 }
 
@@ -65,7 +73,8 @@ run_with_spinner() {
     local msg=$1
     shift
 
-    "$@" &
+    # HARDENED: silence EVERYTHING from wrapped command
+    "$@" > /dev/null 2>&1 &
     local pid=$!
 
     spinner "$pid" "$msg"
@@ -87,26 +96,28 @@ pause
 
 section "SYSTEM PACKAGES"
 
-run_with_spinner "Updating package lists" bash -c "
+run_with_spinner "Updating package lists" bash -c '
     export DEBIAN_FRONTEND=noninteractive
-    sudo apt update -qq
-"
+    apt-get update -qq
+'
 
-run_with_spinner "Upgrading packages" bash -c "
+run_with_spinner "Upgrading packages" bash -c '
     export DEBIAN_FRONTEND=noninteractive
-    sudo apt upgrade -y -qq
-"
+    apt-get upgrade -y -qq
+'
 
-run_with_spinner "Cleaning up packages" bash -c "
-    sudo apt autoremove -y -qq
-"
+run_with_spinner "Cleaning up packages" bash -c '
+    apt-get autoremove -y -qq
+'
 
 step "Installing core apps"
 
-run_with_spinner "Installing LibreOffice" sudo apt install -y libreoffice
-run_with_spinner "Installing Remmina" sudo apt install -y remmina
-run_with_spinner "Installing Chromium" sudo apt install -y chromium
-run_with_spinner "Installing Steam Link" sudo apt install -y steamlink || true
+run_with_spinner "Installing LibreOffice" apt-get install -y -qq libreoffice
+run_with_spinner "Installing Remmina" apt-get install -y -qq remmina
+run_with_spinner "Installing Chromium" apt-get install -y -qq chromium
+
+# Steam Link often lives outside default repos depending on distro
+run_with_spinner "Installing Steam Link" bash -c 'apt-get install -y -qq steamlink' || true
 
 ok "Core applications installed"
 
@@ -118,7 +129,9 @@ section "TAILSCALE"
 
 step "Installing Tailscale"
 
-run_with_spinner "Installing Tailscale" curl -fsSL https://tailscale.com/install.sh | sh
+run_with_spinner "Installing Tailscale" bash -c '
+    curl -fsSL https://tailscale.com/install.sh | bash
+'
 
 ok "Tailscale installed (run 'sudo tailscale up' if needed)"
 
@@ -160,7 +173,6 @@ section "DESKTOP CONFIG"
 
 step "Applying desktop configuration"
 
-# Placeholder for your theme/wallpaper system
 if [ -f "$HOME/hml-golden/scripts/setup-theme.sh" ]; then
     run_with_spinner "Applying theme" bash "$HOME/hml-golden/scripts/setup-theme.sh"
 fi
@@ -179,4 +191,3 @@ section "COMPLETE"
 
 echo ""
 echo -e "${GREEN}✔ Firstboot completed successfully${NC}"
-echo ""
