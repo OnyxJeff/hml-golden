@@ -7,16 +7,17 @@ export APT_LISTCHANGES_FRONTEND=none
 
 echo "[packages] fixing dpkg state if needed..."
 dpkg --configure -a || true
-apt-get install -f -y || true
+sudo apt-get install -f -y || true
 
 echo "[packages] updating..."
-apt-get update -y -qq
+sudo apt-get update -y -qq
 
 echo "[packages] upgrading..."
-apt-get upgrade -y -qq
+sudo apt-get upgrade -y -qq
 
 echo "[packages] installing base tools..."
-apt-get install -y -qq \
+sudo apt-get install -y -qq \
+    steamlink \
     libreoffice-calc \
     remmina \
     chromium \

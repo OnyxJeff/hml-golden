@@ -16,8 +16,8 @@ echo ""
 # --------------------------------------------------
 echo "[*] Installing themes + tools..."
 
-apt-get update -qq
-apt-get install -y \
+sudo apt-get update -qq
+sudo apt-get install -y \
     arc-theme \
     papirus-icon-theme \
     lxappearance \
