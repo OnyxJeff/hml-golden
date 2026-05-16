@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
@@ -7,73 +6,85 @@ REAL_HOME="$(eval echo "~$REAL_USER")"
 
 DESKTOP_DIR="$REAL_HOME/Desktop"
 
-
-if [[ -n "$DESKTOP_DIR" && -d "$DESKTOP_DIR" ]]; then
-    rm -rf "$DESKTOP_DIR"
-fi
+echo ""
+echo "========================================="
+echo " Desktop Provisioning"
+echo "========================================="
+echo "[*] Target user: $REAL_USER"
+echo "[*] Desktop dir: $DESKTOP_DIR"
+echo ""
 
 mkdir -p "$DESKTOP_DIR"
 
 # --------------------------------------------------
-# LibreOffice Calc
+# Helper: write desktop entries safely
 # --------------------------------------------------
+write_desktop() {
+    local name="$1"
+    local content="$2"
 
-cat > "$DESKTOP_DIR/Calc.desktop" <<EOF
+    cat > "$DESKTOP_DIR/$name" <<EOF
+$content
+EOF
+
+    chmod +x "$DESKTOP_DIR/$name"
+}
+
+# --------------------------------------------------
+# Calc
+# --------------------------------------------------
+write_desktop "Calc.desktop" "
 [Desktop Entry]
 Name=Calc Spreadsheet
 Exec=libreoffice --calc
 Icon=libreoffice-calc
 Type=Application
 Terminal=false
-EOF
+"
 
 # --------------------------------------------------
 # Windows VM (RDP)
 # --------------------------------------------------
-
-cat > "$DESKTOP_DIR/Windows-VM.desktop" <<EOF
+write_desktop "Windows-VM.desktop" "
 [Desktop Entry]
 Name=Windows VM (RDP)
 Exec=remmina
 Icon=org.remmina.Remmina
 Type=Application
 Terminal=false
-EOF
+"
 
 # --------------------------------------------------
-# Homarr Portal (SAFE FIX)
+# Homarr Portal
 # --------------------------------------------------
-
 PORTAL_URL="${PORTAL_URL:-https://home.onyxnethq.site}"
 
-cat > "$DESKTOP_DIR/Homarr-Portal.desktop" <<EOF
+write_desktop "Homarr-Portal.desktop" "
 [Desktop Entry]
 Name=Homarr Portal
 Exec=chromium $PORTAL_URL
 Icon=chromium
 Type=Application
 Terminal=false
-EOF
+"
 
 # --------------------------------------------------
 # SSH Terminal
 # --------------------------------------------------
-
-cat > "$DESKTOP_DIR/SSH-Terminal.desktop" <<EOF
+write_desktop "SSH-Terminal.desktop" "
 [Desktop Entry]
 Name=SSH Terminal
 Exec=gnome-terminal
 Icon=utilities-terminal
 Type=Application
 Terminal=false
-EOF
+"
 
 # --------------------------------------------------
-# Steam Link (safe install guard)
+# Steam Link (optional)
 # --------------------------------------------------
-
 if [[ -x /usr/bin/steamlink ]]; then
-cat > "$DESKTOP_DIR/SteamLink.desktop" <<EOF
+write_desktop "SteamLink.desktop" "
 [Desktop Entry]
 Name=Steam Link
 Exec=/usr/bin/steamlink %u
@@ -82,20 +93,27 @@ Terminal=false
 Type=Application
 Categories=Game;
 MimeType=x-scheme-handler/steamlink;
-EOF
+"
 fi
 
 # --------------------------------------------------
 # Tailscale Status
 # --------------------------------------------------
-
-cat > "$DESKTOP_DIR/Tailscale-Status.desktop" <<EOF
+write_desktop "Tailscale-Status.desktop" "
 [Desktop Entry]
 Name=Tailscale Status
 Exec=gnome-terminal -- tailscale status
 Icon=network-vpn
 Type=Application
 Terminal=false
-EOF
+"
 
-chmod +x "$DESKTOP_DIR"/*.desktop
+# --------------------------------------------------
+# FIX OWNERSHIP (THIS IS IMPORTANT)
+# --------------------------------------------------
+chown -R "$REAL_USER:$REAL_USER" "$DESKTOP_DIR"
+
+echo ""
+echo "[✓] Desktop provisioning complete"
+echo "[✓] User: $REAL_USER"
+echo "[✓] No destructive operations performed"

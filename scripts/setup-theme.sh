@@ -1,26 +1,37 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
+
+REAL_USER="${SUDO_USER:-$USER}"
+REAL_HOME="$(eval echo "~$REAL_USER")"
 
 echo ""
 echo "========================================="
-echo " Applying Workstation Theme"
+echo " Theme + Desktop Configuration"
 echo "========================================="
+echo "[*] User: $REAL_USER"
+echo ""
 
 # --------------------------------------------------
-# GTK DARK THEME
+# PACKAGES
 # --------------------------------------------------
+echo "[*] Installing themes + tools..."
 
-echo "[*] Installing dark themes..."
-
-sudo apt-get install -y \
+apt-get update -qq
+apt-get install -y \
     arc-theme \
-    papirus-icon-theme > /dev/null 2>&1
+    papirus-icon-theme \
+    lxappearance \
+    waybar \
+    jq \
+    gnome-terminal \
+    > /dev/null 2>&1 || true
 
-# GTK3 config directory
-mkdir -p "$HOME/.config/gtk-3.0"
+# --------------------------------------------------
+# GTK THEME (LXDE SAFE PATH)
+# --------------------------------------------------
+mkdir -p "$REAL_HOME/.config/gtk-3.0"
 
-cat > "$HOME/.config/gtk-3.0/settings.ini" <<EOF
+cat > "$REAL_HOME/.config/gtk-3.0/settings.ini" <<EOF
 [Settings]
 gtk-theme-name=Arc-Dark
 gtk-icon-theme-name=Papirus-Dark
@@ -28,27 +39,21 @@ gtk-font-name=Sans 10
 gtk-application-prefer-dark-theme=1
 EOF
 
-# --------------------------------------------------
-# QT DARK THEME
-# --------------------------------------------------
+# ALSO set LXDE config (THIS is the important part)
+mkdir -p "$REAL_HOME/.config/lxsession/LXDE-pi"
 
-mkdir -p "$HOME/.config/qt5ct"
-
-cat > "$HOME/.config/qt5ct/qt5ct.conf" <<EOF
-[Appearance]
-icon_theme=Papirus-Dark
-style=Fusion
+cat > "$REAL_HOME/.config/lxsession/LXDE-pi/desktop.conf" <<EOF
+gtk-theme-name=Arc-Dark
+gtk-icon-theme-name=Papirus-Dark
+gtk-font-name=Sans 10
 EOF
 
 # --------------------------------------------------
-# WAYBAR THEME
+# WAYBAR CONFIG
 # --------------------------------------------------
+mkdir -p "$REAL_HOME/.config/waybar"
 
-echo "[*] Configuring Waybar theme..."
-
-mkdir -p "$HOME/.config/waybar"
-
-cat > "$HOME/.config/waybar/style.css" <<EOF
+cat > "$REAL_HOME/.config/waybar/style.css" <<EOF
 * {
     border: none;
     border-radius: 0;
@@ -69,11 +74,10 @@ window#waybar {
 }
 EOF
 
-cat > "$HOME/.config/waybar/config.jsonc" <<EOF
+cat > "$REAL_HOME/.config/waybar/config.jsonc" <<EOF
 {
   "layer": "top",
   "position": "bottom",
-  "height": 24,
   "modules-left": ["clock"],
   "modules-right": ["custom/tailscale"],
 
@@ -89,5 +93,31 @@ cat > "$HOME/.config/waybar/config.jsonc" <<EOF
 }
 EOF
 
+# --------------------------------------------------
+# WAYBAR AUTOSTART (CRITICAL FIX)
+# --------------------------------------------------
+mkdir -p "$REAL_HOME/.config/labwc"
+
+AUTOSTART="$REAL_HOME/.config/labwc/autostart"
+
+touch "$AUTOSTART"
+
+if ! grep -q "waybar" "$AUTOSTART"; then
+    echo "waybar &" >> "$AUTOSTART"
+fi
+
+# fallback for LXDE
+mkdir -p "$REAL_HOME/.config/lxsession/LXDE-pi"
+
+if ! grep -q "waybar" "$REAL_HOME/.config/lxsession/LXDE-pi/autostart" 2>/dev/null; then
+    echo "@waybar" >> "$REAL_HOME/.config/lxsession/LXDE-pi/autostart"
+fi
+
+# --------------------------------------------------
+# FIX OWNERSHIP
+# --------------------------------------------------
+chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.config"
+
 echo ""
-echo "[✓] Theme configuration complete."
+echo "[✓] Theme + Waybar configuration applied"
+echo "[!] Reboot required for full effect"
