@@ -89,13 +89,35 @@ run_with_spinner() {
     local msg=$1
     shift
 
-    timeout 300 "$@" > /dev/null 2>&1 &
+    local logfile
+    logfile=$(mktemp)
+
+    (
+        "$@"
+    ) >"$logfile" 2>&1 &
+
     local pid=$!
 
     spinner "$pid" "$msg"
 
     wait "$pid"
-    return $?
+    local status=$?
+
+    if [[ $status -ne 0 ]]; then
+        echo ""
+        err "$msg failed"
+        echo ""
+
+        echo "----- LAST 40 LOG LINES -----"
+        tail -40 "$logfile"
+        echo "-----------------------------"
+
+        rm -f "$logfile"
+
+        exit "$status"
+    fi
+
+    rm -f "$logfile"
 }
 
 # ============================
