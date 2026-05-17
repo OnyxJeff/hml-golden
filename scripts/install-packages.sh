@@ -15,9 +15,6 @@ sudo apt-get --fix-broken install
 
 echo "[packages] upgrading..."
 sudo apt upgrade -y
-sudo apt-get autoremove &&
-sudo apt-get clean &&
-sudo apt-get autoclean
 
 echo "[packages] installing base tools..."
 sudo apt install -y \
@@ -41,3 +38,8 @@ sudo apt install -y \
     gnupg \
     dbus-user-session \
     steamlink
+
+echo "[packages] cleaning up..."
+sudo apt-get autoremove &&
+sudo apt-get clean &&
+sudo apt-get autoclean
