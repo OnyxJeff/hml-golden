@@ -10,14 +10,14 @@ sudo dpkg --configure -a || true
 sudo apt install -f -y || true
 
 echo "[packages] updating..."
-sudo apt update -y &&
-sudo apt-get --fix-broken install
+sudo apt update -y -qq &&
+sudo apt-get --fix-broken install -qq
 
 echo "[packages] upgrading..."
-sudo apt upgrade -y
+sudo apt upgrade -y -qq
 
 echo "[packages] installing base tools..."
-sudo apt install -y \
+sudo apt install -y -qq \
     libreoffice-calc \
     remmina \
     chromium \
@@ -40,6 +40,6 @@ sudo apt install -y \
     steamlink
 
 echo "[packages] cleaning up..."
-sudo apt-get autoremove &&
-sudo apt-get clean &&
-sudo apt-get autoclean
+sudo apt-get autoremove -qq &&
+sudo apt-get clean -qq &&
+sudo apt-get autoclean -qq
