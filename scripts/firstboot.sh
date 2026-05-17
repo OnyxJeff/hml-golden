@@ -138,9 +138,7 @@ section "SYSTEM PACKAGES"
 step "Running package installer"
 
 if [[ -f "$REPO_DIR/scripts/install-packages.sh" ]]; then
-    run_with_spinner \
-        "Installing system packages " \
-        bash "$REPO_DIR/scripts/install-packages.sh"
+    bash "$REPO_DIR/scripts/install-packages.sh"
 
     ok "System packages installed"
 else
