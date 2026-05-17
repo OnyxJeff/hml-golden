@@ -5,26 +5,46 @@ export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
 export APT_LISTCHANGES_FRONTEND=none
 
+LOGFILE="/tmp/hml-install-packages.log"
+
 APT_FLAGS=(
     -y
+    -qq
     -o Dpkg::Use-Pty=0
     -o Acquire::Retries=3
     -o APT::Install-Recommends=false
 )
 
 # ============================
-# WAIT FOR SYSTEMD STARTUP
+# LOGGING
+# ============================
+
+log() {
+    echo "[packages] $1"
+}
+
+fail() {
+    echo ""
+    echo "[ERROR] $1"
+    echo ""
+    echo "----- LAST 40 LOG LINES -----"
+    tail -40 "$LOGFILE" || true
+    echo "-----------------------------"
+    exit 1
+}
+
+# ============================
+# WAIT FOR SYSTEM
 # ============================
 
 wait_for_system() {
-    echo "[system] waiting for system initialization..."
+    log "waiting for system initialization..."
 
     while [[ "$(systemctl is-system-running 2>/dev/null || true)" == "starting" ]]; do
-        echo "[system] still starting..."
         sleep 5
     done
 
-    echo "[system] initialization complete"
+    log "system initialization complete"
 }
 
 # ============================
@@ -32,7 +52,7 @@ wait_for_system() {
 # ============================
 
 wait_for_apt() {
-    echo "[packages] waiting for apt/dpkg lock..."
+    log "waiting for apt/dpkg lock..."
 
     while \
         sudo lsof /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || \
@@ -40,24 +60,29 @@ wait_for_apt() {
         sudo lsof /var/lib/apt/lists/lock >/dev/null 2>&1 || \
         sudo lsof /var/cache/apt/archives/lock >/dev/null 2>&1
     do
-        echo "[packages] apt is busy..."
         sleep 5
     done
 
-    echo "[packages] apt is available"
+    log "apt is available"
 }
 
 # ============================
-# SYSTEM PREP
+# START
 # ============================
+
+: > "$LOGFILE"
 
 wait_for_system
 wait_for_apt
 
-echo "[packages] repairing package state..."
+# ============================
+# REPAIR PACKAGE STATE
+# ============================
 
-sudo dpkg --configure -a || true
-sudo apt-get install -f "${APT_FLAGS[@]}" || true
+log "repairing package state..."
+
+sudo dpkg --configure -a >>"$LOGFILE" 2>&1 || true
+sudo apt-get install -f "${APT_FLAGS[@]}" >>"$LOGFILE" 2>&1 || true
 
 wait_for_apt
 
@@ -65,9 +90,10 @@ wait_for_apt
 # UPDATE
 # ============================
 
-echo "[packages] updating repositories..."
+log "updating repositories..."
 
-sudo apt-get update
+sudo apt-get update >>"$LOGFILE" 2>&1 \
+    || fail "apt update failed"
 
 wait_for_apt
 
@@ -75,17 +101,18 @@ wait_for_apt
 # UPGRADE
 # ============================
 
-echo "[packages] upgrading installed packages..."
+log "upgrading installed packages..."
 
-sudo apt-get upgrade "${APT_FLAGS[@]}"
+sudo apt-get upgrade "${APT_FLAGS[@]}" >>"$LOGFILE" 2>&1 \
+    || fail "apt upgrade failed"
 
 wait_for_apt
 
 # ============================
-# INSTALL PACKAGES
+# INSTALL
 # ============================
 
-echo "[packages] installing workstation packages..."
+log "installing workstation packages..."
 
 sudo apt-get install "${APT_FLAGS[@]}" \
     libreoffice-calc \
@@ -107,7 +134,9 @@ sudo apt-get install "${APT_FLAGS[@]}" \
     ca-certificates \
     gnupg \
     dbus-user-session \
-    steamlink
+    steamlink \
+    >>"$LOGFILE" 2>&1 \
+    || fail "package installation failed"
 
 wait_for_apt
 
@@ -115,10 +144,14 @@ wait_for_apt
 # CLEANUP
 # ============================
 
-echo "[packages] cleaning up..."
+log "cleaning up..."
 
-sudo apt-get autoremove -y || true
-sudo apt-get autoclean -y || true
-sudo apt-get clean || true
+sudo apt-get autoremove -y >>"$LOGFILE" 2>&1 || true
+sudo apt-get autoclean -y >>"$LOGFILE" 2>&1 || true
+sudo apt-get clean >>"$LOGFILE" 2>&1 || true
 
-echo "[packages] complete"
+# ============================
+# COMPLETE
+# ============================
+
+log "complete"

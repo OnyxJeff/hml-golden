@@ -15,8 +15,6 @@ echo ""
 # PACKAGES
 # --------------------------------------------------
 echo "[*] Installing themes + tools..."
-
-sudo apt-get update -qq
 sudo apt-get install -y \
     arc-theme \
     papirus-icon-theme \
