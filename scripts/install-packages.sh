@@ -10,10 +10,14 @@ sudo dpkg --configure -a || true
 sudo apt install -f -y || true
 
 echo "[packages] updating..."
-sudo apt update -y -qq
+sudo apt update -y -qq &&
+sudo apt-get --fix-broken install -qq
 
 echo "[packages] upgrading..."
 sudo apt upgrade -y -qq
+sudo apt-get autoremove -qq &&
+sudo apt-get clean -qq &&
+sudo apt-get autoclean -qq
 
 echo "[packages] installing base tools..."
 sudo apt install -y -qq \
@@ -37,3 +41,6 @@ sudo apt install -y -qq \
     gnupg \
     dbus-user-session \
     steamlink
+
+echo "[packages] verifying repositories are up to date..."
+sudo apt update -y -qq
