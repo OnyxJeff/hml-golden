@@ -21,9 +21,9 @@ cat > "$REAL_HOME/.local/share/remmina/simc-vm.remmina" <<EOF
 [remmina]
 name=SimulationCraft VM
 protocol=RDP
-server=10.100.0.50
-username=jeff
-password=
+server=10.100.0.71
+username=jmay
+password=welcome123
 resolution_mode=2
 color-depth=32
 window_maximize=1
