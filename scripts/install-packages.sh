@@ -41,6 +41,3 @@ sudo apt install -y -qq \
     gnupg \
     dbus-user-session \
     steamlink
-
-echo "[packages] verifying repositories are up to date..."
-sudo apt update -y -qq
