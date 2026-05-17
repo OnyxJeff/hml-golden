@@ -12,57 +12,35 @@ echo "[*] User: $REAL_USER"
 echo ""
 
 # --------------------------------------------------
-# INSTALL REQUIRED PACKAGES
+# PACKAGES
 # --------------------------------------------------
-
 echo "[*] Installing theme + desktop packages..."
 
-apt-get update -qq
-
-apt-get install -y -qq \
+apt-get install -y \
     papirus-icon-theme \
     lxappearance \
     waybar \
     jq \
-    gnome-terminal \
-    > /dev/null 2>&1 || true
+    gnome-terminal
 
 # --------------------------------------------------
-# GTK THEME CONFIG
+# GTK THEME (LXDE SAFE PATH)
 # --------------------------------------------------
-
-echo "[*] Configuring GTK theme..."
-
 mkdir -p "$REAL_HOME/.config/gtk-3.0"
-mkdir -p "$REAL_HOME/.config/gtk-4.0"
 
 cat > "$REAL_HOME/.config/gtk-3.0/settings.ini" <<EOF
 [Settings]
-gtk-theme-name=Adwaita-dark
+gtk-theme-name=Arc-Dark
 gtk-icon-theme-name=Papirus-Dark
 gtk-font-name=Sans 10
 gtk-application-prefer-dark-theme=1
 EOF
 
-cat > "$REAL_HOME/.config/gtk-4.0/settings.ini" <<EOF
-[Settings]
-gtk-theme-name=Adwaita-dark
-gtk-icon-theme-name=Papirus-Dark
-gtk-font-name=Sans 10
-gtk-application-prefer-dark-theme=1
-EOF
-
-# --------------------------------------------------
-# LXSESSION FALLBACK CONFIG
-# --------------------------------------------------
-
-echo "[*] Configuring LXSession fallback..."
-
+# ALSO set LXDE config (THIS is the important part)
 mkdir -p "$REAL_HOME/.config/lxsession/LXDE-pi"
 
 cat > "$REAL_HOME/.config/lxsession/LXDE-pi/desktop.conf" <<EOF
-[GTK]
-gtk-theme-name=Adwaita-dark
+gtk-theme-name=Arc-Dark
 gtk-icon-theme-name=Papirus-Dark
 gtk-font-name=Sans 10
 EOF
@@ -70,9 +48,6 @@ EOF
 # --------------------------------------------------
 # WAYBAR CONFIG
 # --------------------------------------------------
-
-echo "[*] Configuring Waybar..."
-
 mkdir -p "$REAL_HOME/.config/waybar"
 
 cat > "$REAL_HOME/.config/waybar/style.css" <<EOF
@@ -98,88 +73,48 @@ EOF
 
 cat > "$REAL_HOME/.config/waybar/config.jsonc" <<EOF
 {
-    "layer": "top",
-    "position": "bottom",
+  "layer": "top",
+  "position": "bottom",
+  "modules-left": ["clock"],
+  "modules-right": ["custom/tailscale"],
 
-    "modules-left": [
-        "clock"
-    ],
+  "custom/tailscale": {
+    "exec": "~/.config/waybar/tailscale-status.sh",
+    "interval": 10,
+    "return-type": "json"
+  },
 
-    "modules-right": [
-        "custom/tailscale"
-    ],
-
-    "clock": {
-        "format": "{:%Y-%m-%d %H:%M}"
-    },
-
-    "custom/tailscale": {
-        "exec": "/home/$REAL_USER/.config/waybar/tailscale-status.sh",
-        "interval": 10,
-        "return-type": "json"
-    }
+  "clock": {
+    "format": "{:%Y-%m-%d %H:%M}"
+  }
 }
 EOF
 
 # --------------------------------------------------
-# TAILSCALE STATUS SCRIPT
+# WAYBAR AUTOSTART (CRITICAL FIX)
 # --------------------------------------------------
-
-echo "[*] Creating Tailscale status script..."
-
-cat > "$REAL_HOME/.config/waybar/tailscale-status.sh" <<'EOF'
-#!/usr/bin/env bash
-
-if tailscale status >/dev/null 2>&1; then
-    echo '{"text":"󰖂 Connected","class":"connected"}'
-else
-    echo '{"text":"󰖂 Offline","class":"disconnected"}'
-fi
-EOF
-
-chmod +x "$REAL_HOME/.config/waybar/tailscale-status.sh"
-
-# --------------------------------------------------
-# LABWC AUTOSTART
-# --------------------------------------------------
-
-echo "[*] Configuring Waybar autostart..."
-
 mkdir -p "$REAL_HOME/.config/labwc"
 
 AUTOSTART="$REAL_HOME/.config/labwc/autostart"
 
 touch "$AUTOSTART"
 
-if ! grep -q "^waybar" "$AUTOSTART"; then
+if ! grep -q "waybar" "$AUTOSTART"; then
     echo "waybar &" >> "$AUTOSTART"
 fi
 
-# --------------------------------------------------
-# LXSESSION FALLBACK AUTOSTART
-# --------------------------------------------------
+# fallback for LXDE
+mkdir -p "$REAL_HOME/.config/lxsession/LXDE-pi"
 
-LX_AUTOSTART="$REAL_HOME/.config/lxsession/LXDE-pi/autostart"
-
-touch "$LX_AUTOSTART"
-
-if ! grep -q "^@waybar" "$LX_AUTOSTART"; then
-    echo "@waybar" >> "$LX_AUTOSTART"
+if ! grep -q "waybar" "$REAL_HOME/.config/lxsession/LXDE-pi/autostart" 2>/dev/null; then
+    echo "@waybar" >> "$REAL_HOME/.config/lxsession/LXDE-pi/autostart"
 fi
 
 # --------------------------------------------------
-# OWNERSHIP FIX
+# FIX OWNERSHIP
 # --------------------------------------------------
-
-echo "[*] Fixing permissions..."
-
 chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.config"
 
-# --------------------------------------------------
-# COMPLETE
-# --------------------------------------------------
-
 echo ""
-echo "[✓] Theme + desktop configuration applied"
-echo "[!] Reboot recommended"
-echo ""
+echo "[✓] Theme + Waybar configuration applied"
+echo "[!] Reboot required for full effect"
