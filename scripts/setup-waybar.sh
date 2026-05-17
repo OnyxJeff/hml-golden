@@ -91,7 +91,7 @@ cat > "$WAYBAR_DIR/tailscale-status.sh" <<'EOF'
 #!/usr/bin/env bash
 
 if ! command -v tailscale >/dev/null 2>&1; then
-    echo '{"text":"TS","class":"disconnected","tooltip":"Tailscale not installed"}'
+    echo '{"text":"Tailscale","class":"disconnected","tooltip":"Tailscale not installed"}'
     exit 0
 fi
 
@@ -100,9 +100,9 @@ STATUS=$(tailscale status --json 2>/dev/null || true)
 if command -v jq >/dev/null 2>&1 && \
    echo "$STATUS" | jq -e '.BackendState == "Running"' >/dev/null 2>&1; then
 
-    echo '{"text":"● TS","class":"connected","tooltip":"Tailscale Connected"}'
+    echo '{"text":"● Tailscale","class":"connected","tooltip":"Tailscale Connected"}'
 else
-    echo '{"text":"● TS","class":"disconnected","tooltip":"Tailscale Disconnected"}'
+    echo '{"text":"● Tailscale","class":"disconnected","tooltip":"Tailscale Disconnected"}'
 fi
 EOF
 
