@@ -25,10 +25,13 @@ server=10.100.0.71
 username=jmay
 password=welcome123
 resolution_mode=2
-color-depth=32
 window_maximize=1
+color-depth=16
+security=negotiate
+ignore-tls-errors=1
 disableclipboard=0
 sound=local
+network=auto
 EOF
 
 echo ""

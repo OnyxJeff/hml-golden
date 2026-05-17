@@ -117,6 +117,9 @@ log "installing workstation packages..."
 sudo apt-get install "${APT_FLAGS[@]}" \
     libreoffice-calc \
     remmina \
+    remmina-plugin-rdp \
+    remmina-plugin-secret \
+    remmina-plugin-vnc \
     chromium \
     git \
     curl \
