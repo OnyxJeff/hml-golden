@@ -16,12 +16,11 @@ echo ""
 # --------------------------------------------------
 echo "[*] Installing theme + desktop packages..."
 
-sudo dpkg --configure -a
-sudo apt-get install -y \
+dpkg --configure -a
+
+apt-get install -y \
     papirus-icon-theme \
     lxappearance
-
-wait_for_apt
 
 # --------------------------------------------------
 # GTK THEME (LXDE SAFE PATH)
@@ -40,7 +39,7 @@ EOF
 mkdir -p "$REAL_HOME/.config/lxsession/LXDE-pi"
 
 cat > "$REAL_HOME/.config/lxsession/LXDE-pi/desktop.conf" <<EOF
-gtk-theme-name=Arc-Dark
+gtk-theme-name=Adwaita-dark
 gtk-icon-theme-name=Papirus-Dark
 gtk-font-name=Sans 10
 EOF
