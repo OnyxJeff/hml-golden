@@ -19,10 +19,9 @@ echo "[*] Installing theme + desktop packages..."
 sudo dpkg --configure -a
 sudo apt-get install -y \
     papirus-icon-theme \
-    lxappearance \
-    waybar \
-    jq \
-    gnome-terminal
+    lxappearance
+
+wait_for_apt
 
 # --------------------------------------------------
 # GTK THEME (LXDE SAFE PATH)
