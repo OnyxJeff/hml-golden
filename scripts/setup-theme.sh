@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -x
 
 REAL_USER="${SUDO_USER:-$USER}"
 REAL_HOME="$(eval echo "~$REAL_USER")"
