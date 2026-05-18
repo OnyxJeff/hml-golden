@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -x
+set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
 REAL_HOME="$(eval echo "~$REAL_USER")"
@@ -16,7 +16,8 @@ echo ""
 # --------------------------------------------------
 echo "[*] Installing theme + desktop packages..."
 
-apt-get install -y \
+sudo dpkg --configure -a
+sudo apt-get install -y \
     papirus-icon-theme \
     lxappearance \
     waybar \
