@@ -122,7 +122,7 @@ grep -qxF "waybar &" "$AUTOSTART" || echo "waybar &" >> "$AUTOSTART"
 # OWNERSHIP FIX
 # ============================
 
-chown -R "$REAL_USER:$REAL_USER" "$WAYBAR_DIR"
+sudo chown -R "$REAL_USER:$REAL_USER" "$WAYBAR_DIR"
 
 echo ""
 echo "[✓] Waybar configured successfully"

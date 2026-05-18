@@ -120,5 +120,12 @@ Compute:
   ssh simc
 EOF
 
+# --------------------------------------------------
+# Fix ownership (CRITICAL when run via sudo)
+# --------------------------------------------------
+
+sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.ssh"
+sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/Homelab-SSH"
+
 echo ""
 echo "[✓] Modular SSH configuration installed."

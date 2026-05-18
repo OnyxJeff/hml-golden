@@ -34,5 +34,16 @@ sound=local
 network=auto
 EOF
 
+# --------------------------------------------------
+# Fixing Ownership
+# --------------------------------------------------
+
+sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.config"
+sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.local"
+
+# --------------------------------------------------
+# Done
+# --------------------------------------------------
+
 echo ""
 echo "[✓] Remmina profiles installed."

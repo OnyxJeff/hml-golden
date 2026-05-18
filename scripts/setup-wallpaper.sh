@@ -59,7 +59,7 @@ desktop_font=Sans 10
 EOF
 
 # Ensure ownership is correct (VERY important when run via sudo)
-chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.config/pcmanfm" "$REAL_HOME/Pictures"
+sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.config/pcmanfm" "$REAL_HOME/Pictures"
 
 # --------------------------------------------------
 # FORCE reload (important fix)

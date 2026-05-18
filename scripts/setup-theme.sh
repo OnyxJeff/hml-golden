@@ -113,7 +113,7 @@ fi
 # --------------------------------------------------
 # FIX OWNERSHIP
 # --------------------------------------------------
-chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.config"
+sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.config"
 
 echo ""
 echo "[✓] Theme + Waybar configuration applied"

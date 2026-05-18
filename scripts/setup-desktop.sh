@@ -111,7 +111,7 @@ Terminal=false
 # --------------------------------------------------
 # FIX OWNERSHIP (THIS IS IMPORTANT)
 # --------------------------------------------------
-chown -R "$REAL_USER:$REAL_USER" "$DESKTOP_DIR"
+sudo chown -R "$REAL_USER:$REAL_USER" "$DESKTOP_DIR"
 
 echo ""
 echo "[✓] Desktop provisioning complete"
