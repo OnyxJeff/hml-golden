@@ -29,7 +29,7 @@ mkdir -p "$REAL_HOME/.config/gtk-3.0"
 
 cat > "$REAL_HOME/.config/gtk-3.0/settings.ini" <<EOF
 [Settings]
-gtk-theme-name=Arc-Dark
+gtk-theme-name=Adwaita-dark
 gtk-icon-theme-name=Papirus-Dark
 gtk-font-name=Sans 10
 gtk-application-prefer-dark-theme=1
@@ -75,10 +75,10 @@ cat > "$REAL_HOME/.config/waybar/config.jsonc" <<EOF
   "layer": "top",
   "position": "bottom",
   "modules-left": ["clock"],
-  "modules-right": ["custom/tailscale"],
+  "modules-right": ["custom-tailscale"],
 
-  "custom/tailscale": {
-    "exec": "~/.config/waybar/tailscale-status.sh",
+  "custom-tailscale": {
+    "exec": "/home/$REAL_USER/.config/waybar/tailscale-status.sh",
     "interval": 10,
     "return-type": "json"
   },
