@@ -12,17 +12,6 @@ echo "[*] User: $REAL_USER"
 echo ""
 
 # --------------------------------------------------
-# PACKAGES
-# --------------------------------------------------
-echo "[*] Installing theme + desktop packages..."
-
-dpkg --configure -a
-
-apt-get install -y \
-    papirus-icon-theme \
-    lxappearance
-
-# --------------------------------------------------
 # GTK THEME (LXDE SAFE PATH)
 # --------------------------------------------------
 mkdir -p "$REAL_HOME/.config/gtk-3.0"
@@ -75,7 +64,7 @@ cat > "$REAL_HOME/.config/waybar/config.jsonc" <<EOF
   "layer": "top",
   "position": "bottom",
   "modules-left": ["clock"],
-  "modules-right": ["custom-tailscale"],
+  "modules-right": ["custom/tailscale"],
 
   "custom-tailscale": {
     "exec": "/home/$REAL_USER/.config/waybar/tailscale-status.sh",

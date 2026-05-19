@@ -129,6 +129,8 @@ sudo apt-get install "${APT_FLAGS[@]}" \
     btop \
     openssh-server \
     gnome-terminal \
+    papirus-icon-theme \
+    lxappearance \
     network-manager \
     jq \
     waybar \
