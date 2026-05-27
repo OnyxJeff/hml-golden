@@ -4,6 +4,21 @@ export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
 export APT_LISTCHANGES_FRONTEND=none
 
+# =========================
+# CI MODE (VALIDATION)
+# =========================
+if [[ "${1:-}" == "--ci-mode" ]]; then
+    echo "[CI MODE] Validating scripts only"
+
+    bash -n firstboot.sh
+    bash -n install-packages.sh
+    bash -n setup-theme.sh
+    bash -n setup-waybar.sh
+
+    echo "[CI MODE] Syntax OK"
+    exit 0
+fi
+
 # ============================
 # CONFIG
 # ============================
