@@ -4,19 +4,23 @@ set -euo pipefail
 REAL_USER="${SUDO_USER:-$USER}"
 REAL_HOME="$(eval echo "~$REAL_USER")"
 
+GTK3_DIR="$REAL_HOME/.config/gtk-3.0"
+LX_DIR="$REAL_HOME/.config/lxsession/LXDE-pi"
+
 echo ""
 echo "========================================="
-echo " Theme + Desktop Configuration"
+echo " Theme Configuration"
 echo "========================================="
 echo "[*] User: $REAL_USER"
 echo ""
 
 # --------------------------------------------------
-# GTK THEME (LXDE SAFE PATH)
+# GTK FALLBACK CONFIG
 # --------------------------------------------------
-mkdir -p "$REAL_HOME/.config/gtk-3.0"
 
-cat > "$REAL_HOME/.config/gtk-3.0/settings.ini" <<EOF
+mkdir -p "$GTK3_DIR"
+
+cat > "$GTK3_DIR/settings.ini" <<EOF
 [Settings]
 gtk-theme-name=Adwaita-dark
 gtk-icon-theme-name=Papirus-Dark
@@ -24,85 +28,44 @@ gtk-font-name=Sans 10
 gtk-application-prefer-dark-theme=1
 EOF
 
-# ALSO set LXDE config (THIS is the important part)
-mkdir -p "$REAL_HOME/.config/lxsession/LXDE-pi"
+# --------------------------------------------------
+# LXDE FALLBACK
+# --------------------------------------------------
 
-cat > "$REAL_HOME/.config/lxsession/LXDE-pi/desktop.conf" <<EOF
+mkdir -p "$LX_DIR"
+
+cat > "$LX_DIR/desktop.conf" <<EOF
 gtk-theme-name=Adwaita-dark
 gtk-icon-theme-name=Papirus-Dark
 gtk-font-name=Sans 10
 EOF
 
 # --------------------------------------------------
-# WAYBAR CONFIG
+# MODERN DARK MODE (gsettings)
 # --------------------------------------------------
-mkdir -p "$REAL_HOME/.config/waybar"
 
-cat > "$REAL_HOME/.config/waybar/style.css" <<EOF
-* {
-    border: none;
-    border-radius: 0;
-    font-family: Sans;
-    font-size: 12px;
-    min-height: 0;
-}
+echo "[*] Applying system theme (gsettings)..."
 
-window#waybar {
-    background: rgba(20, 20, 20, 0.92);
-    color: #ffffff;
-}
+USER_ID="$(id -u "$REAL_USER")"
+DBUS_ADDR="unix:path=/run/user/$USER_ID/bus"
 
-#clock,
-#custom-tailscale {
-    padding: 0 10px;
-    margin: 2px 4px;
-}
-EOF
+sudo -u "$REAL_USER" \
+DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDR" \
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' || true
 
-cat > "$REAL_HOME/.config/waybar/config.jsonc" <<EOF
-{
-  "layer": "top",
-  "position": "bottom",
-  "modules-left": ["clock"],
-  "modules-right": ["custom/tailscale"],
+sudo -u "$REAL_USER" \
+DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDR" \
+gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark' || true
 
-  "custom-tailscale": {
-    "exec": "/home/$REAL_USER/.config/waybar/tailscale-status.sh",
-    "interval": 10,
-    "return-type": "json"
-  },
-
-  "clock": {
-    "format": "{:%Y-%m-%d %H:%M}"
-  }
-}
-EOF
+sudo -u "$REAL_USER" \
+DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDR" \
+gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark' || true
 
 # --------------------------------------------------
-# WAYBAR AUTOSTART (CRITICAL FIX)
+# PERMISSIONS
 # --------------------------------------------------
-mkdir -p "$REAL_HOME/.config/labwc"
 
-AUTOSTART="$REAL_HOME/.config/labwc/autostart"
-
-touch "$AUTOSTART"
-
-if ! grep -q "waybar" "$AUTOSTART"; then
-    echo "waybar &" >> "$AUTOSTART"
-fi
-
-# fallback for LXDE
-mkdir -p "$REAL_HOME/.config/lxsession/LXDE-pi"
-
-if ! grep -q "waybar" "$REAL_HOME/.config/lxsession/LXDE-pi/autostart" 2>/dev/null; then
-    echo "@waybar" >> "$REAL_HOME/.config/lxsession/LXDE-pi/autostart"
-fi
-
-# --------------------------------------------------
-# FIX OWNERSHIP
-# --------------------------------------------------
-sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.config"
+chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.config"
 
 echo ""
-echo "[✓] Theme + Waybar configuration applied"
-echo "[!] Reboot required for full effect"
+echo "[✓] Theme configured successfully"
