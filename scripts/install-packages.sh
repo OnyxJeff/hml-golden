@@ -134,6 +134,7 @@ sudo apt-get install "${APT_FLAGS[@]}" \
     network-manager \
     jq \
     waybar \
+    policykit-1 \
     unclutter \
     xterm \
     ca-certificates \

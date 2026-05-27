@@ -14,7 +14,7 @@ mkdir -p "$LABWC_DIR"
 # WAYBAR CONFIG
 # ============================
 
-cat > "$WAYBAR_DIR/config.jsonc" <<'EOF'
+cat > "$WAYBAR_DIR/config.jsonc" <<EOF
 {
   "layer": "top",
   "position": "bottom",
@@ -29,10 +29,10 @@ cat > "$WAYBAR_DIR/config.jsonc" <<'EOF'
   ],
 
   "custom/tailscale": {
-    "exec": "~/.config/waybar/tailscale-status.sh",
-    "interval": 10,
+    "exec": "$WAYBAR_DIR/tailscale-status.sh",
+    "interval": 5,
     "return-type": "json",
-    "on-click": "gnome-terminal -- tailscale status"
+    "on-click": "$WAYBAR_DIR/tailscale-toggle.sh"
   },
 
   "clock": {
@@ -109,6 +109,22 @@ EOF
 chmod +x "$WAYBAR_DIR/tailscale-status.sh"
 
 # ============================
+# TAILSCALE TOGGLE SCRIPT
+# ============================
+
+cat > "$WAYBAR_DIR/tailscale-toggle.sh" <<'EOF'
+#!/usr/bin/env bash
+
+if tailscale status >/dev/null 2>&1; then
+    pkexec tailscale down
+else
+    pkexec tailscale up
+fi
+EOF
+
+chmod +x "$WAYBAR_DIR/tailscale-toggle.sh"
+
+# ============================
 # LABWC AUTOSTART
 # ============================
 
@@ -122,7 +138,7 @@ grep -qxF "waybar &" "$AUTOSTART" || echo "waybar &" >> "$AUTOSTART"
 # OWNERSHIP FIX
 # ============================
 
-sudo chown -R "$REAL_USER:$REAL_USER" "$WAYBAR_DIR"
+chown -R "$REAL_USER:$REAL_USER" "$WAYBAR_DIR"
 
 echo ""
 echo "[✓] Waybar configured successfully"

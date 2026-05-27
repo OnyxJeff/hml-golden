@@ -17,22 +17,8 @@ mkdir -p "$REAL_HOME/Desktop"
 # SimulationCraft VM
 # --------------------------------------------------
 
-cat > "$REAL_HOME/.local/share/remmina/simc-vm.remmina" <<EOF
-[remmina]
-name=SimulationCraft VM
-protocol=RDP
-server=10.100.0.71
-username=jmay
-password=welcome123
-resolution_mode=2
-window_maximize=1
-color-depth=16
-security=negotiate
-ignore-tls-errors=1
-disableclipboard=0
-sound=local
-network=auto
-EOF
+echo "copying Remmina profile for SimulationCraft VM..."
+cp -rv $REAL_HOME/hml-golden/remmina-profiles/. $REAL_HOME/.local/share/remmina/
 
 # --------------------------------------------------
 # Fixing Ownership

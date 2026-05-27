@@ -53,49 +53,7 @@ EOF
 # COMPUTE NODES
 # --------------------------------------------------
 
-cat > "$REAL_HOME/.ssh/config.d/compute.conf" <<EOF
-# Compute Cluster
-
-Host pp0
-    HostName 10.100.0.10
-    User potentpi0
-
-Host pp1
-    HostName 10.100.0.11
-    User potentpi1
-
-Host pp2
-    HostName 10.100.0.12
-    User potentpi2
-
-Host pp3
-    HostName 10.100.0.13
-    User potentpi3
-
-Host pp4
-    HostName 10.100.0.14
-    User potentpi4
-
-Host pp5
-    HostName 10.10.25.21
-    User root
-
-Host pp6
-    HostName 10.10.25.20
-    User potentpi6
-
-Host simc
-    HostName 10.100.0.50
-    User root
-EOF
-
-# --------------------------------------------------
-# GAMING
-# --------------------------------------------------
-
-cat > "$REAL_HOME/.ssh/config.d/gaming.conf" <<EOF
-# Gaming / Media Nodes
-EOF
+cp -rv $REAL_HOME/hml-golden/ssh-config/compute.conf $REAL_HOME/.ssh/config.d/compute.conf
 
 # --------------------------------------------------
 # README
@@ -117,7 +75,7 @@ Compute:
   ssh pp4
   ssh pp5
   ssh pp6
-  ssh simc
+  ssh workstation
 EOF
 
 # --------------------------------------------------
