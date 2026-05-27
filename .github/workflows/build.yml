@@ -27,7 +27,7 @@ jobs:
 
       - name: Validate repo structure
         run: |
-          test -f install-packages.sh
-          test -f setup-theme.sh
-          test -f setup-waybar.sh
+          test -f scripts/install-packages.sh
+          test -f scripts/setup-theme.sh
+          test -f scripts/setup-waybar.sh
           echo "All core scripts present"
