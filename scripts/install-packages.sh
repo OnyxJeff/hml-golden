@@ -135,6 +135,7 @@ sudo apt-get install "${APT_FLAGS[@]}" \
     jq \
     waybar \
     wofi \
+    swaybg \
     unclutter \
     xterm \
     ca-certificates \
