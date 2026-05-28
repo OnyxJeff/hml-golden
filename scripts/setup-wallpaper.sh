@@ -10,12 +10,14 @@ WALLPAPER_DIR="$SCRIPT_DIR/../wallpapers"
 DEFAULT_WALLPAPER="homelab-default.jpg"
 SELECTED_WALL=""
 
-LABWC_AUTOSTART="$REAL_HOME/.config/labwc/autostart"
+PCMANFM_CONF_DIR="$REAL_HOME/.config/pcmanfm/LXDE-pi"
+PCMANFM_CONF="$PCMANFM_CONF_DIR/desktop-items-0.conf"
+
 DEST_DIR="$REAL_HOME/Pictures"
 
 echo ""
 echo "========================================="
-echo " Wallpaper Setup (Pi OS 13 / Labwc Safe)"
+echo " Wallpaper Setup (PCManFM Model - PiOS 13)"
 echo "========================================="
 echo ""
 
@@ -48,31 +50,43 @@ FINAL_WALL="$DEST_DIR/homelab-wallpaper.$EXT"
 cp -f "$SELECTED_WALL" "$FINAL_WALL"
 
 # --------------------------------------------------
-# Ensure labwc autostart exists
+# Ensure PCManFM config path exists
 # --------------------------------------------------
 
-mkdir -p "$(dirname "$LABWC_AUTOSTART")"
-touch "$LABWC_AUTOSTART"
+mkdir -p "$PCMANFM_CONF_DIR"
 
-# Remove any existing wallpaper lines safely
-grep -v "swaybg" "$LABWC_AUTOSTART" > "$LABWC_AUTOSTART.tmp" 2>/dev/null || true
-mv "$LABWC_AUTOSTART.tmp" "$LABWC_AUTOSTART" 2>/dev/null || true
+# --------------------------------------------------
+# Write PCManFM wallpaper config (AUTHORITATIVE)
+# --------------------------------------------------
 
-# Add correct persistent wallpaper rule
-echo "swaybg -i \"$FINAL_WALL\" -m fill &" >> "$LABWC_AUTOSTART"
+cat > "$PCMANFM_CONF" <<EOF
+[*]
+wallpaper=$FINAL_WALL
+wallpaper_mode=stretch
+show_wm_menu=0
+desktop_bg=#000000
+desktop_fg=#ffffff
+desktop_shadow=0
+desktop_font=Sans 10
+EOF
+
+# --------------------------------------------------
+# Restart desktop wallpaper renderer safely
+# --------------------------------------------------
+
+echo "[*] Restarting PCManFM desktop (if running)..."
+
+pkill pcmanfm || true
+nohup sudo -u "$REAL_USER" pcmanfm --desktop --profile=LXDE-pi >/dev/null 2>&1 &
 
 # --------------------------------------------------
 # Permissions
 # --------------------------------------------------
 
 chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/Pictures"
-chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.config/labwc"
-
-# --------------------------------------------------
-# IMPORTANT NOTE
-# --------------------------------------------------
+chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.config/pcmanfm"
 
 echo ""
-echo "[✓] Wallpaper configured for labwc autostart"
-echo "[✓] Will apply on next session restart (NOT SSH session)"
-echo "[!] Run: labwc-restart or reboot to see it"
+echo "[✓] Wallpaper now controlled by PCManFM"
+echo "[✓] Labwc no longer involved in wallpaper management"
+echo "[✓] Changes persist across reboot"

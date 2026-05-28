@@ -215,12 +215,6 @@ if [[ -f "$REPO_DIR/scripts/setup-theme.sh" ]]; then
         timeout 60 bash "$REPO_DIR/scripts/setup-theme.sh" || true
 fi
 
-if [[ -f "$REPO_DIR/scripts/setup-wallpaper.sh" ]]; then
-    run_with_spinner \
-        "Setting wallpaper " \
-        timeout 60 bash "$REPO_DIR/scripts/setup-wallpaper.sh" || true
-fi
-
 if [[ -f "$REPO_DIR/scripts/setup-waybar.sh" ]]; then
     run_with_spinner \
         "Configuring Waybar " \
@@ -231,6 +225,12 @@ if [[ -f "$REPO_DIR/scripts/setup-desktop.sh" ]]; then
     run_with_spinner \
         "Configuring Desktop " \
         bash "$REPO_DIR/scripts/setup-desktop.sh" || true
+fi
+
+if [[ -f "$REPO_DIR/scripts/setup-wallpaper.sh" ]]; then
+    run_with_spinner \
+        "Setting wallpaper " \
+        timeout 60 bash "$REPO_DIR/scripts/setup-wallpaper.sh" || true
 fi
 
 ok "Desktop configured"
