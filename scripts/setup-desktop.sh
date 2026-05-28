@@ -97,18 +97,6 @@ MimeType=x-scheme-handler/steamlink;
 fi
 
 # --------------------------------------------------
-# Tailscale Status
-# --------------------------------------------------
-write_desktop "Tailscale-Status.desktop" "
-[Desktop Entry]
-Name=Tailscale Status
-Exec=gnome-terminal -- tailscale status
-Icon=network-vpn
-Type=Application
-Terminal=false
-"
-
-# --------------------------------------------------
 # FIX OWNERSHIP (THIS IS IMPORTANT)
 # --------------------------------------------------
 sudo chown -R "$REAL_USER:$REAL_USER" "$DESKTOP_DIR"
