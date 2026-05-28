@@ -9,13 +9,13 @@ LX_DIR="$REAL_HOME/.config/lxsession/LXDE-pi"
 
 echo ""
 echo "========================================="
-echo " Theme Configuration"
+echo " Theme Configuration (Stable Mode)"
 echo "========================================="
 echo "[*] User: $REAL_USER"
 echo ""
 
 # --------------------------------------------------
-# GTK FALLBACK CONFIG
+# GTK FALLBACK CONFIG (always safe)
 # --------------------------------------------------
 
 mkdir -p "$GTK3_DIR"
@@ -29,7 +29,7 @@ gtk-application-prefer-dark-theme=1
 EOF
 
 # --------------------------------------------------
-# LXDE FALLBACK
+# LXDE FALLBACK (harmless if unused)
 # --------------------------------------------------
 
 mkdir -p "$LX_DIR"
@@ -41,31 +41,38 @@ gtk-font-name=Sans 10
 EOF
 
 # --------------------------------------------------
-# MODERN DARK MODE (gsettings)
+# MODERN SESSION THEMING (safe attempt only)
 # --------------------------------------------------
 
-echo "[*] Applying system theme (gsettings)..."
+echo "[*] Attempting gsettings (if session supports it)..."
 
-USER_ID="$(id -u "$REAL_USER")"
-DBUS_ADDR="unix:path=/run/user/$USER_ID/bus"
+if command -v gsettings >/dev/null 2>&1; then
 
-sudo -u "$REAL_USER" \
-DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDR" \
-gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' || true
+    # Only works if user session bus exists
+    if [[ -S "/run/user/$(id -u "$REAL_USER")/bus" ]]; then
 
-sudo -u "$REAL_USER" \
-DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDR" \
-gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark' || true
+        sudo -u "$REAL_USER" \
+        DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u "$REAL_USER")/bus" \
+        gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
 
-sudo -u "$REAL_USER" \
-DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDR" \
-gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark' || true
+        sudo -u "$REAL_USER" \
+        DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u "$REAL_USER")/bus" \
+        gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark' 2>/dev/null || true
+
+        sudo -u "$REAL_USER" \
+        DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u "$REAL_USER")/bus" \
+        gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark' 2>/dev/null || true
+
+    else
+        echo "[*] No active D-Bus session → skipping gsettings (expected in bootstrap)"
+    fi
+fi
 
 # --------------------------------------------------
-# PERMISSIONS
+# OWNERSHIP FIX
 # --------------------------------------------------
 
 chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.config"
 
 echo ""
-echo "[✓] Theme configured successfully"
+echo "[✓] Theme config written (may require relogin to fully apply)"
