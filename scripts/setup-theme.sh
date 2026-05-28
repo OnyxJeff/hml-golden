@@ -29,18 +29,6 @@ gtk-application-prefer-dark-theme=1
 EOF
 
 # --------------------------------------------------
-# LXDE FALLBACK (harmless if unused)
-# --------------------------------------------------
-
-mkdir -p "$LX_DIR"
-
-cat > "$LX_DIR/desktop.conf" <<EOF
-gtk-theme-name=Adwaita-dark
-gtk-icon-theme-name=Papirus-Dark
-gtk-font-name=Sans 10
-EOF
-
-# --------------------------------------------------
 # MODERN SESSION THEMING (safe attempt only)
 # --------------------------------------------------
 
