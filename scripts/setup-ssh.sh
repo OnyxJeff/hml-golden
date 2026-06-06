@@ -1,69 +1,92 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo ""
+echo
 echo "========================================="
 echo " Configuring Modular SSH"
 echo "========================================="
 
 REAL_USER="${SUDO_USER:-$USER}"
-REAL_HOME="$(eval echo "~$REAL_USER")"
+REAL_HOME="$(getent passwd "$REAL_USER" | cut -d: -f6)"
 
-mkdir -p "$REAL_HOME/.ssh/config.d"
-mkdir -p "$REAL_HOME/Homelab-SSH"
+SSH_DIR="$REAL_HOME/.ssh"
+CONFIG_DIR="$SSH_DIR/config.d"
+README_DIR="$REAL_HOME/Homelab-SSH"
+
+mkdir -p "$SSH_DIR"
+mkdir -p "$CONFIG_DIR"
+mkdir -p "$README_DIR"
 
 # --------------------------------------------------
-# MAIN CONFIG
+
+# MAIN SSH CONFIG
+
 # --------------------------------------------------
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BASE_CONFIG="$SCRIPT_DIR/../ssh-config/config"
+cat > "$SSH_DIR/config" <<'EOF'
 
-if [[ -f "$BASE_CONFIG" ]]; then
-    cp "$BASE_CONFIG" "$REAL_HOME/.ssh/config"
+# Homelab modular SSH configuration
+
+Include config.d/*.conf
+EOF
+
+chmod 700 "$SSH_DIR"
+chmod 600 "$SSH_DIR/config"
+
+# --------------------------------------------------
+
+# COMPUTE NODES
+
+# --------------------------------------------------
+
+COMPUTE_SOURCE="$REAL_HOME/hml-golden/ssh-config/config/compute.conf"
+
+if [[ -f "$COMPUTE_SOURCE" ]]; then
+cp -f "$COMPUTE_SOURCE" "$CONFIG_DIR/compute.conf"
+chmod 600 "$CONFIG_DIR/compute.conf"
+echo "[✓] Installed compute.conf"
 else
-    echo "[!] Missing base SSH config, skipping copy"
+echo "[!] Missing compute.conf:"
+echo "    $COMPUTE_SOURCE"
 fi
 
-chmod 700 "$REAL_HOME/.ssh"
-touch "$REAL_HOME/.ssh/config"
-chmod 600 "$REAL_HOME/.ssh/config"
-
-# --------------------------------------------------
-# COMPUTE NODES
 # --------------------------------------------------
 
-cp -rv $REAL_HOME/hml-golden/ssh-config/config/compute.conf $REAL_HOME/.ssh/config.d/compute.conf
-
-# --------------------------------------------------
 # README
+
 # --------------------------------------------------
 
-cat > "$REAL_HOME/Homelab-SSH/README.txt" <<EOF
+cat > "$README_DIR/README.txt" <<'EOF'
 SSH Aliases Available:
 
 Core:
-  ssh truenas
-  ssh aesir
-  ssh vanir
+ssh truenas
+ssh aesir
+ssh vanir
 
 Compute:
-  ssh pp0
-  ssh pp1
-  ssh pp2
-  ssh pp3
-  ssh pp4
-  ssh pp5
-  ssh pp6
-  ssh workstation
+ssh pp0
+ssh pp1
+ssh pp2
+ssh pp3
+ssh pp4
+ssh pp5
+ssh pp6
+ssh workstation
 EOF
 
 # --------------------------------------------------
-# Fix ownership (CRITICAL when run via sudo)
+
+# OWNERSHIP
+
 # --------------------------------------------------
 
-sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.ssh"
-sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/Homelab-SSH"
+if [[ "$(id -u)" -eq 0 ]]; then
+chown -R "$REAL_USER:$REAL_USER" "$SSH_DIR"
+chown -R "$REAL_USER:$REAL_USER" "$README_DIR"
+fi
 
-echo ""
+echo
 echo "[✓] Modular SSH configuration installed."
+echo "[i] Active SSH configs:"
+find "$CONFIG_DIR" -name "*.conf" -type f
