@@ -30,26 +30,6 @@ touch "$REAL_HOME/.ssh/config"
 chmod 600 "$REAL_HOME/.ssh/config"
 
 # --------------------------------------------------
-# CORE SERVERS
-# --------------------------------------------------
-
-cat > "$REAL_HOME/.ssh/config.d/core.conf" <<EOF
-# Core Infrastructure
-
-Host truenas
-    HostName 10.100.0.15
-    User truenas_admin
-
-Host aesir
-    HostName 10.100.0.30
-    User root
-
-Host vanir
-    HostName 10.100.0.61
-    User root
-EOF
-
-# --------------------------------------------------
 # COMPUTE NODES
 # --------------------------------------------------
 
