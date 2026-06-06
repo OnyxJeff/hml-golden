@@ -140,6 +140,7 @@ sudo apt-get install "${APT_FLAGS[@]}" \
     ca-certificates \
     gnupg \
     dbus-user-session \
+    rclone \
     steamlink \
     >>"$LOGFILE" 2>&1 \
     || fail "package installation failed"
