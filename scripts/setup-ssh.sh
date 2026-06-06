@@ -33,7 +33,7 @@ chmod 600 "$REAL_HOME/.ssh/config"
 # COMPUTE NODES
 # --------------------------------------------------
 
-cp -rv $REAL_HOME/hml-golden/ssh-config/compute.conf $REAL_HOME/.ssh/config.d/compute.conf
+cp -rv $REAL_HOME/hml-golden/ssh-config/config/compute.conf $REAL_HOME/.ssh/config.d/compute.conf
 
 # --------------------------------------------------
 # README
