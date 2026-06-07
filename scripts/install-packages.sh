@@ -141,6 +141,7 @@ sudo apt-get install "${APT_FLAGS[@]}" \
     gnupg \
     dbus-user-session \
     rclone \
+    fuse3 \
     steamlink \
     >>"$LOGFILE" 2>&1 \
     || fail "package installation failed"
