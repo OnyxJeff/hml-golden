@@ -232,6 +232,12 @@ sleep 2
 ok "System configuration complete"
 
 # ============================
+# STEP 5 - REPO OWNERSHIP
+# ============================
+
+chmod 700 "$REAL_HOME/$REPO_NAME"
+
+# ============================
 # FINISH
 # ============================
 
@@ -247,14 +253,16 @@ sleep 2
 echo "Recommended next steps:"
 sleep 1
 echo "  1. Review the log file for any issues."
-sleep 1
+sleep 0.5
 echo "  2. run: sudo tailscale set --operator=$REAL_USER"
-sleep 1
+sleep 0.5
 echo "  3. run: tailscale up"
-sleep 1
+sleep 0.5
 echo "  4. Authenticate to your tailnet"
-sleep 1
-echo "  5. Reboot the system to apply all changes."
-sleep 1
-echo "  6. Enjoy your new Pi workstation!"
+sleep 0.5
+echo "  5. Make sure to assign your exit node in Tailscale settings."
+sleep 0.5
+echo "  6. Reboot the system to apply all changes."
+sleep 0.5
+echo "  7. Enjoy your new Pi workstation!"
 echo ""

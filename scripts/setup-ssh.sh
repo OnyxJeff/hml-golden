@@ -35,6 +35,21 @@ chmod 600 "$SSH_DIR/config"
 
 # --------------------------------------------------
 
+# SSH KEYS
+
+# --------------------------------------------------
+
+KEYS_SOURCE="$REAL_HOME/hml-golden/ssh-config/keys"
+
+if compgen -G "$KEYS_SOURCE/*" > /dev/null; then
+    cp -f "$KEYS_SOURCE"/* "$SSH_DIR/"
+    echo "[✓] SSH Keys copied"
+else
+    echo "[!] No keys found, skipping"
+fi
+
+# --------------------------------------------------
+
 # COMPUTE NODES
 
 # --------------------------------------------------
