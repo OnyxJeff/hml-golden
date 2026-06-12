@@ -121,6 +121,7 @@ sudo apt-get install "${APT_FLAGS[@]}" \
     remmina-plugin-secret \
     remmina-plugin-vnc \
     chromium \
+    lsb-release \
     git \
     curl \
     wget \
